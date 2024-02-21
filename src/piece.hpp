@@ -27,7 +27,7 @@ class Piece
     virtual std::vector<Square> const
     pseudo_legal_moves(Position const &position, Square const &from) const = 0;
 
-  protected:
+  private:
     Color _color;
 };
 

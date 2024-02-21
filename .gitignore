@@ -1,0 +1,7 @@
+# CMake files
+CMakeFiles/
+CMakeCache.txt
+*.cmake
+
+# Documentation files
+doc/
