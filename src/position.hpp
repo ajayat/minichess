@@ -24,8 +24,8 @@ struct Position {
 class Square
 {
   public:
-    int const x; // file
-    int const y; // rank
+    int const x;  // file
+    int const y;  // rank
     std::string const name;
 
   public:

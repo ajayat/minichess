@@ -1,1 +1,1 @@
-# Chess Game
+# MiniChess Project

@@ -1,0 +1,27 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+ColumnLimit: 80
+
+PointerAlignment: Right
+SortIncludes: CaseSensitive
+IndentWidth: 4
+UseTab: Never
+
+AllowShortBlocksOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: Inline
+
+MaxEmptyLinesToKeep: 1
+SpacesBeforeTrailingComments: 2
+IndentCaseLabels: true
+BreakStringLiterals: true
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: true
+  AfterFunction: true
+  AfterStruct: false
+  AfterNamespace: true
+---
+
