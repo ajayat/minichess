@@ -10,26 +10,36 @@
 class Player
 {
   public:
-    std::string const name;
-    std::string const color;
+    Player(std::string const pseudo, Color color) : _name(pseudo), _color(color)
+    {}
 
-  public:
-    Player(std::string const pseudo, Color color);
-    virtual void wait(std::vector<Position> const &_history) = 0;
+    virtual ~Player() = default;
+    virtual Move const wait(std::vector<Position> const &_history) = 0;
+
+    Color color() const { return _color; }
+
+    std::string const name() const { return _name; }
+
+  private:
+    Color _color;
+    std::string _name;
 };
 
 class Engine : public Player
 {
   public:
     Engine();
-    void wait(std::vector<Position> const &_history) override;
+    ~Engine() override = default;
+    Move const wait(std::vector<Position> const &_history) override;
 };
 
 class Human : public Player
 {
   public:
-    Human();
-    void wait(std::vector<Position> const &_history) override;
+    Human() : Player("Human", Color::WHITE) {}
+
+    ~Human() override = default;
+    Move const wait(std::vector<Position> const &_history) override;
 
   private:
     bool check(std::string const &uci) const;

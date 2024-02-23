@@ -4,7 +4,10 @@
 
 int main()
 {
-    Game game;
-    game.show();
-    return 0;
+    Game game(new Human(), new Human());
+    while (true) {
+        game.show();
+        Move move = game.wait_player();
+        game.move(move);
+    }
 }

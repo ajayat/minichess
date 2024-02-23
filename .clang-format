@@ -6,16 +6,19 @@ ColumnLimit: 80
 PointerAlignment: Right
 SortIncludes: CaseSensitive
 IndentWidth: 4
+ContinuationIndentWidth: 2
 UseTab: Never
-
 AllowShortBlocksOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortFunctionsOnASingleLine: Inline
-
 MaxEmptyLinesToKeep: 1
 SpacesBeforeTrailingComments: 2
 IndentCaseLabels: true
 BreakStringLiterals: true
+OperandAlignmentStyle: true
+BreakBeforeBinaryOperators: NonAssignment
+SeparateDefinitionBlocks: Always
+BinPackArguments: false
 
 BreakBeforeBraces: Custom
 BraceWrapping:
@@ -23,5 +26,6 @@ BraceWrapping:
   AfterFunction: true
   AfterStruct: false
   AfterNamespace: true
+  SplitEmptyFunction: false
 ---
 
