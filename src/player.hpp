@@ -1,8 +1,16 @@
 #pragma once
 
-#include "position.hpp"
 #include <string>
 #include <vector>
+
+#include "position.hpp"
+
+enum Status { QUIT, CANCEL, DRAW, RESIGN, MOVE };
+
+struct ResponseStatus {
+    Status const status;
+    std::string const move;
+};
 
 /**
  * Abstract class that represents a player.
@@ -10,36 +18,34 @@
 class Player
 {
   public:
-    Player(std::string const pseudo, Color color) : _name(pseudo), _color(color)
-    {}
-
+    Player(std::string const &name, Color color);
     virtual ~Player() = default;
-    virtual Move const wait(std::vector<Position> const &_history) = 0;
 
-    Color color() const { return _color; }
+    virtual ResponseStatus wait(std::vector<Position> const &_history) = 0;
+    std::string const &name() const;
+    Color color() const;
 
-    std::string const name() const { return _name; }
-
-  private:
-    Color _color;
+  protected:
     std::string _name;
+    Color _color;
 };
 
 class Engine : public Player
 {
   public:
-    Engine();
+    Engine(std::string const name, Color color);
     ~Engine() override = default;
-    Move const wait(std::vector<Position> const &_history) override;
+
+    ResponseStatus wait(std::vector<Position> const &_history) override;
 };
 
 class Human : public Player
 {
   public:
-    Human() : Player("Human", Color::WHITE) {}
-
+    Human(std::string const name, Color color);
     ~Human() override = default;
-    Move const wait(std::vector<Position> const &_history) override;
+
+    ResponseStatus wait(std::vector<Position> const &_history) override;
 
   private:
     bool check(std::string const &uci) const;

@@ -13,7 +13,8 @@ AllowShortIfStatementsOnASingleLine: Never
 AllowShortFunctionsOnASingleLine: Inline
 MaxEmptyLinesToKeep: 1
 SpacesBeforeTrailingComments: 2
-IndentCaseLabels: true
+BracedInitializerIndentWidth: 4
+IndentCaseLabels: false
 BreakStringLiterals: true
 OperandAlignmentStyle: true
 BreakBeforeBinaryOperators: NonAssignment
@@ -26,6 +27,8 @@ BraceWrapping:
   AfterFunction: true
   AfterStruct: false
   AfterNamespace: true
+  BeforeCatch: true
+  BeforeWhile: true
   SplitEmptyFunction: false
 ---
 

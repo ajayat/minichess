@@ -412,7 +412,7 @@ Echiquier::Echiquier ()
 * Enfin, la classe doit permettre de visualiser l'échiquier (le plus important pour l'utilisateur). L'affichage montré en exemple est produit par l'extrait de code suivant:
 
 ```cpp
-void Echiquier::affiche () const {
+void Echiquier::affiche() const {
     string space5 = string(5,' ');
     cout << endl;
     cout << "     a     b     c     d     e     f     g     h    "<< endl;
@@ -421,15 +421,15 @@ void Echiquier::affiche () const {
         cout << i+1 << " "; // numérotation ligne dans affichage
         for (int j(0);j<NBCOL;j++) {
             cout << "|" ;
-            if (echiquier\[i\]\[j\]) { 
-                cout << "\\u0020\\u0020";  //U+0020 est un esapce utf-8 taille police
-                echiquier\[i\]\[j\]-> affiche();
-                cout << "\\u0020" << " ";
+            if (echiquier[i][j]) { 
+                cout << "\u0020\u0020";  //U+0020 est un esapce utf-8 taille police
+                echiquier[i][j]->affiche();
+                cout << "\u0020" << " ";
             }
             else 
                 cout << space5;  // 2 ascii spaces
         }
-        cout << "|\\n  +-----+-----+-----+-----+-----+-----+-----+-----+";
+        cout << "|\n  +-----+-----+-----+-----+-----+-----+-----+-----+";
         cout << endl;
     }
 }

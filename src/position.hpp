@@ -4,55 +4,52 @@
 
 enum PieceType { NIL, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
 
-enum Color { WHITE, BLACK };
+enum Color { WHITE, BLACK, NOCOLOR };
 
-/**
- * A position is a board state
- */
-struct Position {
-    PieceType board[64];
-    Color const turn;
-    int const fifty_move_rule;
-    bool const white_castle;
-    bool const black_castle;
-    bool const en_passant;
+struct PieceInfo {
+    PieceType type;
+    Color color;
 };
 
 /**
  * A square describe a location on the board
  */
-class Square
-{
-  public:
-    int const x;  // file
-    int const y;  // rank
-    std::string const name;
+struct Square {
+    int x;  // file
+    int y;  // rank
+    std::string name;
 
-  public:
-    Square(int x, int y);
+    Square() noexcept;
+    Square(int file, int rank);
     Square(std::string const name);
-    Square(Square const &other) = default;
 
-    bool operator==(Square const &other) const
-    {
-        return x == other.x && y == other.y;
-    }
+    bool operator==(Square const &other) const;
 };
 
+/**
+ * A position is a board state
+ */
+struct Position {
+    PieceInfo board[8][8];
+    Color turn;
+    int fifty_move_rule;
+    bool white_castle;
+    bool black_castle;
+    Square en_passant;
+};
+
+/**
+ * Aggregates movement information
+ */
 class Move
 {
   public:
-    Move(Square from, Square to) : _from{from}, _to{to} {}
+    Square from;
+    Square to;
+    PieceType promotion = NIL;
+
+  public:
+    Move(Square from, Square to, PieceType promotion = NIL);
     Move(std::string const uci);
-
-    Square const &from() const { return _from; }
-    Square const &to() const { return _to; }
-    std::string const to_uci() const { return _from.name + _to.name; }
-
-    bool operator==(Move const &other) const;
-    bool operator!=(Move const &other) const;
-
-  private:
-    Square _from;
-    Square _to;
+    std::string const to_uci() const;
 };

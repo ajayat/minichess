@@ -2,57 +2,74 @@
 #include <iostream>
 
 #include "board.hpp"
-#include "piece.hpp"
 
-Board::Board() : _board{nullptr}, _turn(WHITE)
+Board::Board() : _board{nullptr}
 {
     // Initial position of the pieces
-    _board[0][0] = new Rook(WHITE);
-    _board[1][0] = new Knight(WHITE);
-    _board[2][0] = new Bishop(WHITE);
-    _board[3][0] = new Queen(WHITE);
-    _board[4][0] = new King(WHITE);
-    _board[5][0] = new Bishop(WHITE);
-    _board[6][0] = new Knight(WHITE);
-    _board[7][0] = new Rook(WHITE);
+    _board[0][0] = new Rook("\u2656", WHITE);
+    _board[0][1] = new Knight("\u2658", WHITE);
+    _board[0][2] = new Bishop("\u2657", WHITE);
+    _board[0][3] = new Queen("\u2655", WHITE);
+    _board[0][4] = new King("\u2654", WHITE);
+    _board[0][5] = new Bishop("\u2657", WHITE);
+    _board[0][6] = new Knight("\u2658", WHITE);
+    _board[0][7] = new Rook("\u2656", WHITE);
 
-    _board[0][7] = new Rook(BLACK);
-    _board[1][7] = new Knight(BLACK);
-    _board[2][7] = new Bishop(BLACK);
-    _board[3][7] = new Queen(BLACK);
-    _board[4][7] = new King(BLACK);
-    _board[5][7] = new Bishop(BLACK);
-    _board[6][7] = new Knight(BLACK);
-    _board[7][7] = new Rook(BLACK);
+    _board[7][0] = new Rook("\u265C", BLACK);
+    _board[7][1] = new Knight("\u265E", BLACK);
+    _board[7][2] = new Bishop("\u265D", BLACK);
+    _board[7][3] = new Queen("\u265B", BLACK);
+    _board[7][4] = new King("\u265A", BLACK);
+    _board[7][5] = new Bishop("\u265D", BLACK);
+    _board[7][6] = new Knight("\u265E", BLACK);
+    _board[7][7] = new Rook("\u265C", BLACK);
 
-    for (int x = 0; x < 8; x++) {
-        _board[x][1] = new Pawn(WHITE);
-        _board[x][6] = new Pawn(BLACK);
+    for (int x = 0; x < NCOL; x++) {
+        _board[1][x] = new Pawn("\u2659", WHITE);
+        _board[6][x] = new Pawn("\u265F", BLACK);
     }
-}
+
+    for (int i = 0; i < NROW; i++) {
+        for (int j = 0; j < NCOL; j++) {
+            if (_board[i][j] == nullptr)
+                _position.board[i][j] = {.type = NIL, .color = NOCOLOR};
+            else
+                _position.board[i][j] = {.type = _board[i][j]->type,
+                                         .color = _board[i][j]->color};
+        }
+    }
+    _position.turn = WHITE;
+    _position.fifty_move_rule = 0;
+    _position.white_castle = true;
+    _position.black_castle = true;
+};
 
 Board::~Board()
 {
     for (int i = 0; i < NROW; i++) {
-        for (int j = 0; j < NCOL; j++)
+        for (int j = 0; j < NCOL; j++) {
             delete _board[i][j];
+            _board[i][j] = nullptr;
+        }
     }
 }
 
 void Board::print() const
 {
-    std::string space5 = std::string(5, ' ');
+    std::string space5 = std::string(5, '\u0020');
     std::cout << std::endl;
     std::cout << "  +-----+-----+-----+-----+-----+-----+-----+-----+"
               << std::endl;
-    for (int y = NCOL - 1; y >= 0; y--) {
-        std::cout << y + 1 << " ";  // numérotation ligne dans affichage
-        for (int x = 0; x < NROW; x++) {
+    for (int i = NCOL - 1; i >= 0; i--) {
+        std::cout << i + 1 << " ";  // numérotation ligne dans affichage
+        for (int j = 0; j < NROW; j++) {
             std::cout << "|";
-            if (_board[y][x] == nullptr)
+            if (_board[i][j]) {
+                std::cout << "\u0020\u0020";  // U+0020 est un espace utf-8
+                _board[i][j]->print();
+                std::cout << "\u0020\u0020";
+            } else
                 std::cout << space5;
-            else
-                _board[y][x]->print();
         }
         std::cout << "|\n  +-----+-----+-----+-----+-----+-----+-----+-----+"
                   << std::endl;
@@ -63,7 +80,7 @@ void Board::print() const
 
 Color Board::turn() const
 {
-    return _turn;
+    return _position.turn;
 }
 
 Piece *Board::operator()(Square const &square) const
@@ -71,159 +88,128 @@ Piece *Board::operator()(Square const &square) const
     return _board[square.x][square.y];
 }
 
-void Board::move(Square const &from, Square const &to)
+void Board::move(Move const &move)
 {
+    Square from = move.from, to = move.to;
     Piece *piece = _board[from.y][from.x];
+
+    if (piece->type == PAWN) {
+        Pawn *pawn = static_cast<Pawn *>(piece);
+        if (pawn->is_en_passant(this->get_position(), from, to))
+            _position.en_passant = to;
+
+        if (std::abs(from.y - to.y) == 2)  // pawn double move
+            _position.en_passant = Square(from.x, (from.y + to.y) / 2);
+
+        if (move.promotion != NIL)
+            piece = this->create_piece(move.promotion, piece->color);
+    }
+    if (piece->type == KING) {
+        if (piece->color == WHITE)
+            _position.white_castle = false;
+        else
+            _position.black_castle = false;
+    }
+
+    if (this->is_capture(move))
+        _position.fifty_move_rule = 0;
+    else
+        _position.fifty_move_rule++;
+
+    // Update board
     _board[to.y][to.x] = piece;
     _board[from.y][from.x] = nullptr;
+
+    _position.board[to.y][to.x] = _position.board[from.y][from.x];
+    _position.board[from.y][from.x] = {.type = NIL, .color = NOCOLOR};
+    // Update turn
+    _position.turn = (this->turn() == WHITE) ? BLACK : WHITE;
 }
 
-bool Board::is_pseudo_legal(Square const &from, Square const &to) const
+bool Board::is_pseudo_legal(Move const &move) const
 {
-    Piece *piece = _board[from.x][from.y];
-    std::vector<Square> const squares =
-      piece->pseudo_legal_moves(position(), from);
-
-    return std::find(squares.begin(), squares.end(), to) != squares.end();
+    Piece *piece = _board[move.from.x][move.from.y];
+    if (piece == nullptr) {
+        std::cout << "no_piece" << std::endl;  // TODO: error
+        return false;
+    }
+    return piece->is_pseudo_legal(this->get_position(), move.from, move.to);
 }
 
-bool Board::is_legal(Square const &from, Square const &to) const
+bool Board::is_legal(Move const &move)
 {
-    return is_pseudo_legal(from, to) && !is_check(from, to, _turn);
+    if (!is_pseudo_legal(move))
+        return false;
+
+    Position position = this->get_position();
+    this->move(move);  // Simulate move
+    bool is_legal = !is_checked(this->turn());
+    this->set_position(position);  // Undo move
+    return is_legal;
 }
 
-bool Board::is_capture(Square const &from, Square const &to) const
+bool Board::is_capture(Move const &move) const
 {
-    return is_pseudo_legal(from, to) && _board[to.x][to.y] != nullptr;
+    return is_pseudo_legal(move) && _board[move.to.x][move.to.y] != nullptr;
 }
 
 Square const Board::find_king(Color color) const
 {
-    for (int x = 0; x < NCOL; x++) {
-        for (int y = 0; y < NROW; y++) {
-            if (_board[x][y]->type() == KING && _board[x][y]->color() == color)
-                return Square(x, y);
+    for (int i = 0; i < NROW; i++) {
+        for (int j = 0; j < NCOL; j++) {
+            if (_board[i][j]->type == KING && _board[i][j]->color == color)
+                return Square(i, j);
         }
     }
     throw std::runtime_error("King not found");
 }
 
-bool Board::is_check(Square const &from, Square const &to, Color color) const
+bool Board::is_checked(Color color) const
 {
     Square king = find_king(color);
-    for (int x = 0; x < NCOL; x++) {
-        for (int y = 0; y < NROW; y++) {
-            if (is_capture(Square(x, y), king))
+    for (int i = 0; i < NCOL; i++) {
+        for (int j = 0; j < NROW; j++) {
+            if (is_capture(Move(Square(i, j), king)))
                 return true;
         }
     }
     return false;
 }
 
-Position const Board::position() const
+Position const Board::get_position() const
 {
-    Position position = Position{
-      {NIL},
-      _turn,
-      _fifty_move_rule,
-      _white_castle,
-      _black_castle,
-      _en_passant,
-    };
-
-    for (int i = 0; i < 64; i++) {
-        int y = i / 8;
-        int x = i % 8;
-        if (_board[y][x] != nullptr)
-            position.board[i] = _board[y][x]->type();
-    }
-    return position;
+    return _position;
 }
 
-/*
-bool Board::is_move(Square *from, Square *to, Pawn *piece) const
+Piece *Board::create_piece(PieceType type, Color color)
 {
-    int x1 = move->from()->x(), y1 = from->y();
-    int x2 = to->x(), y2 = to->y();
-
-    if (!to->is_empty() &&
-        from->get_piece()->color() == to->get_piece()->color())
-        return false;
-
-    if (piece->color() == WHITE) {
-        if (x1 == x2) {
-            if (y1 == 1 && y2 == 3 && to->is_empty())
-                return true; // first move of step 2
-            if (y1 + 1 == y2 && to->is_empty())
-                return true; // step of 1
-            return false;
-        }
-        if (y2 == y1 + 1 && abs(x1 - x2) == 1) {
-            if (to->is_empty()) { // en passant
-                Piece *p = get(x2, y2 - 1)->get_piece();
-                return (p->is_pawn() && p->n_moves() == 1);
-            }
-            return true; // capture
-        }
-        return false;
+    switch (type) {
+    case PAWN:
+        return new Pawn("\u2659", color);
+    case KNIGHT:
+        return new Knight("\u2658", color);
+    case BISHOP:
+        return new Bishop("\u2657", color);
+    case ROOK:
+        return new Rook("\u2656", color);
+    case QUEEN:
+        return new Queen("\u2655", color);
+    case KING:
+        return new King("\u2654", color);
+    default:
+        return nullptr;
     }
-
-    if (piece->color() == BLACK) {
-        if (x1 == x2) {
-            if (y1 == 6 && y2 == 4 && to->is_empty())
-                return true; // first move of step 2
-            if (y1 - 1 == y2 && to->is_empty())
-                return true; // step of 1
-            return false;
-        }
-        if (y2 == y1 - 1 && abs(x1 - x2) == 1) {
-            if (to->is_empty()) { // en passant
-                Piece *p = get(x2, y2 + 1)->get_piece();
-                return (p->is_pawn() && p->n_moves() == 1);
-            }
-            return true; // capture
-        }
-        return false;
-    }
-    return false;
 }
 
-bool Board::is_move(Square *from, Square *to, Rook *piece) const
+void Board::set_position(Position const &position)
 {
-    int x1 = from->x(), y1 = from->y();
-    int x2 = to->x(), y2 = to->y();
+    _position = position;
 
-    if (x1 != x2 && y1 != y2)
-        return false;
-
-    if (x1 == x2) {
-        int y_min = std::min(y1, y2);
-        int y_max = std::max(y1, y2);
-        for (int y = y_min + 1; y < y_max; y++) {
-            if (!_board[x1][y]->is_empty())
-                return false;
+    for (int i = 0; i < NROW; i++) {
+        for (int j = 0; j < NCOL; j++) {
+            delete _board[i][j];
+            PieceInfo const &piece = position.board[i][j];
+            _board[i][j] = this->create_piece(piece.type, piece.color);
         }
     }
-    if (y1 == y2) {
-        int x_min = std::min(x1, x2);
-        int x_max = std::max(x1, x2);
-        for (int x = x_min + 1; x < x_max; x++) {
-            if (!_board[x][y1]->is_empty())
-                return false;
-        }
-    }
-    return true;
 }
-
-bool Board::is_move(Square *from, Square *to, Knight *piece) const
-{
-    int x1 = from->x(), y1 = from->y();
-    int x2 = to->x(), y2 = to->y();
-
-    if (abs(x1 - x2) == 2 && abs(y1 - y2) == 1)
-        return true;
-    if (abs(x1 - x2) == 1 && abs(y1 - y2) == 2)
-        return true;
-    return false;
-}
-*/
