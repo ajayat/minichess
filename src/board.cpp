@@ -42,7 +42,6 @@ Board::~Board()
 
 void Board::print() const
 {
-
     std::string space5 = std::string(5, '\u0020');
     std::cout << std::endl;
     std::cout << "  +-----+-----+-----+-----+-----+-----+-----+-----+"

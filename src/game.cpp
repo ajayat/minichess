@@ -16,7 +16,7 @@ void Game::show() const
 void Game::wait(Player *player)
 {
     ResponseStatus response = player->wait(_history);
-    this->apply(response);
+    _status = this->apply(response);
 }
 
 Player *Game::current() const
@@ -83,8 +83,8 @@ GameStatus Game::draw()
 {
     if (this->fifty_move_rule() || this->threefold_repetition())
         return ABORTED;
-    std::cout << this->current()->name()
-              << ", accept draw ? (y/n): " << std::endl;
+    std::cout << this->opponent(this->current())->name()
+              << ", accept draw ? (y/n): ";
 
     char answer;
     std::cin >> answer;

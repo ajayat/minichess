@@ -19,7 +19,7 @@ Square::Square(std::string const name)
     if (name.size() != 2)
         throw std::invalid_argument("name must be 2 characters long");
     if (x < 0 || x > 7 || y < 0 || y > 7)
-        throw std::out_of_range("x and y must be between 0 and 7");
+        throw std::out_of_range("Invalid coordinates");
 }
 
 bool Square::operator==(Square const &other) const
