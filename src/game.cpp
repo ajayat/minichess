@@ -72,8 +72,10 @@ bool Game::fifty_move_rule() const
 
 GameStatus Game::cancel()
 {
-    _history.pop_back();
-    _board.set_position(_history.back());
+    if (_history.size() > 0) {
+        _history.pop_back();
+        _board.set_position(_history.back());
+    }
     return ONGOING;
 }
 

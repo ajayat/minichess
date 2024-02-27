@@ -42,11 +42,19 @@ Board::~Board()
 
 void Board::print() const
 {
+
     std::string space5 = std::string(5, '\u0020');
     std::cout << std::endl;
     std::cout << "  +-----+-----+-----+-----+-----+-----+-----+-----+"
               << std::endl;
-    for (int i = NCOL - 1; i >= 0; i--) {
+
+    int begin = NROW - 1, end = -1, step = -1;
+    if (this->turn() == BLACK) {
+        begin = 0;
+        end = NROW;
+        step = 1;
+    }
+    for (int i = begin; i != end; i += step) {
         std::cout << i + 1 << " ";  // numérotation ligne dans affichage
         for (int j = 0; j < NROW; j++) {
             std::cout << "|";
@@ -54,7 +62,8 @@ void Board::print() const
                 std::cout << "\u0020\u0020";  // U+0020 est un espace utf-8
                 _board[i][j]->print();
                 std::cout << "\u0020\u0020";
-            } else
+            }
+            else
                 std::cout << space5;
         }
         std::cout << "|\n  +-----+-----+-----+-----+-----+-----+-----+-----+"
@@ -83,11 +92,9 @@ void Board::move(Move const &move)
         Pawn *pawn = static_cast<Pawn *>(piece);
         if (pawn->is_en_passant(this->get_position(), from, to))
             _position.en_passant = to;
-
-        if (std::abs(from.y - to.y) == 2)  // pawn double move
+        else if (std::abs(from.y - to.y) == 2)  // pawn double move
             _position.en_passant = Square(from.x, (from.y + to.y) / 2);
-
-        if (move.promotion != NIL)
+        else if (move.promotion != NIL)
             piece = this->create_piece(move.promotion, piece->color);
     }
     if (piece->type == KING) {
@@ -96,7 +103,6 @@ void Board::move(Move const &move)
         else
             _position.black_castle = false;
     }
-
     if (this->is_capture(move) || piece->type == PAWN)
         _position.fifty_move_rule = 0;
     else
@@ -105,7 +111,6 @@ void Board::move(Move const &move)
     // Update board
     _board[to.y][to.x] = piece;
     _board[from.y][from.x] = nullptr;
-
     _position.board[to.y][to.x] = _position.board[from.y][from.x];
     _position.board[from.y][from.x] = {.type = NIL, .color = NOCOLOR};
     // Update turn
