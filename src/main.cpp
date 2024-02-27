@@ -7,45 +7,32 @@ int main()
     Player *white = new Human("Alice", WHITE);
     Player *black = new Human("Bob", BLACK);
     Game game(white, black);
-    game.show();
 
-    while (true) {
-        ResponseStatus response = game.wait(game.current());
-        switch (response.status) {
-        case QUIT:
-            std::cout << "Game aborted" << std::endl;
-            return 0;
-        case CANCEL:
-            game.cancel();
-            continue;
-        case DRAW:
-            std::cout << game.opponent(game.current())->name()
-                      << ", accept draw ? (y/n): " << std::endl;
-
-            char answer;
-            std::cin >> answer;
-            if (answer == 'y') {
-                std::cout << "Draw." << std::endl;
-                return 0;
-            }
-            std::cout << "Draw refused." << std::endl;
-            continue;
-        case RESIGN:
-            std::cout << game.opponent(game.current())->name() << " wins."
-                      << std::endl;
-            return 0;
-        case MOVE:
-            if (!game.move(response.move))
-                continue;
-        }
+    while (game.status() == ONGOING) {
         game.show();
-
-        if (game.is_checkmate(game.current())) {
-            std::cout << game.current()->name() << "lose." << std::endl;
-            break;
-        } else if (game.is_stalemate(game.current())) {
-            std::cout << "Stalemate." << std::endl;
-            break;
-        }
+        game.wait(game.current());
     }
+    switch (game.status()) {
+    case WHITE_WIN:
+        std::cout << white->name() << "win." << std::endl;
+        break;
+    case BLACK_WIN:
+        std::cout << black->name() << "win." << std::endl;
+        break;
+    case STALEMATE:
+        std::cout << "Draw (Stalemate)" << std::endl;
+        break;
+    case FIFTY_MOVE_RULE:
+        std::cout << "Draw (Fifty-move rule)" << std::endl;
+        break;
+    case THREEFOLD_REPETITION:
+        std::cout << "Draw (Threefold repetition)" << std::endl;
+        break;
+    case ABORTED:
+        std::cout << "Game aborted." << std::endl;
+        break;
+    default:
+        std::cerr << "Game aborted for unknown reason." << std::endl;
+    }
+    return 0;
 }

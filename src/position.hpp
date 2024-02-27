@@ -36,6 +36,8 @@ struct Position {
     bool white_castle;
     bool black_castle;
     Square en_passant;
+
+    bool operator==(Position const &other) const;
 };
 
 /**

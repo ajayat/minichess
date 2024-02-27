@@ -29,6 +29,7 @@ BraceWrapping:
   AfterNamespace: true
   BeforeCatch: true
   BeforeWhile: true
+  BeforeElse: true
   SplitEmptyFunction: false
 ---
 

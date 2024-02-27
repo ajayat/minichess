@@ -41,7 +41,7 @@ ResponseStatus Human::wait(std::vector<Position> const &_history)
 {
     std::string uci;
     do {
-        std::cout << "Enter your move: ";
+        std::cout << _name << ", enter your move: ";
         std::cin >> uci;
         if (uci == "/quit")
             return ResponseStatus{QUIT};

@@ -32,8 +32,7 @@ class Piece
 class King : public Piece
 {
   public:
-    King(std::string const name, Color color) : Piece(KING, name, color) {}
-
+    King(Color color);
     ~King() override = default;
 
     bool is_castling(Position const &position, Square const &from,
@@ -45,8 +44,7 @@ class King : public Piece
 class Queen : public Piece
 {
   public:
-    Queen(std::string const name, Color color) : Piece(QUEEN, name, color) {}
-
+    Queen(Color color);
     ~Queen() override = default;
 
     bool is_pseudo_legal(Position const &position, Square const &from,
@@ -56,8 +54,7 @@ class Queen : public Piece
 class Rook : public Piece
 {
   public:
-    Rook(std::string const name, Color color) : Piece(ROOK, name, color) {}
-
+    Rook(Color color);
     ~Rook() override = default;
 
     bool is_pseudo_legal(Position const &position, Square const &from,
@@ -67,8 +64,7 @@ class Rook : public Piece
 class Bishop : public Piece
 {
   public:
-    Bishop(std::string const name, Color color) : Piece(BISHOP, name, color) {}
-
+    Bishop(Color color);
     ~Bishop() override = default;
 
     bool is_pseudo_legal(Position const &position, Square const &from,
@@ -78,8 +74,7 @@ class Bishop : public Piece
 class Knight : public Piece
 {
   public:
-    Knight(std::string const name, Color color) : Piece(KNIGHT, name, color) {}
-
+    Knight(Color color);
     ~Knight() override = default;
 
     bool is_pseudo_legal(Position const &position, Square const &from,
@@ -89,8 +84,7 @@ class Knight : public Piece
 class Pawn : public Piece
 {
   public:
-    Pawn(std::string const name, Color color) : Piece(PAWN, name, color) {}
-
+    Pawn(Color color);
     ~Pawn() override = default;
 
     bool is_en_passant(Position const &position, Square const &from,

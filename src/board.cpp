@@ -5,44 +5,30 @@
 
 Board::Board() : _board{nullptr}
 {
-    // Initial position of the pieces
-    _board[0][0] = new Rook("\u2656", WHITE);
-    _board[0][1] = new Knight("\u2658", WHITE);
-    _board[0][2] = new Bishop("\u2657", WHITE);
-    _board[0][3] = new Queen("\u2655", WHITE);
-    _board[0][4] = new King("\u2654", WHITE);
-    _board[0][5] = new Bishop("\u2657", WHITE);
-    _board[0][6] = new Knight("\u2658", WHITE);
-    _board[0][7] = new Rook("\u2656", WHITE);
-
-    _board[7][0] = new Rook("\u265C", BLACK);
-    _board[7][1] = new Knight("\u265E", BLACK);
-    _board[7][2] = new Bishop("\u265D", BLACK);
-    _board[7][3] = new Queen("\u265B", BLACK);
-    _board[7][4] = new King("\u265A", BLACK);
-    _board[7][5] = new Bishop("\u265D", BLACK);
-    _board[7][6] = new Knight("\u265E", BLACK);
-    _board[7][7] = new Rook("\u265C", BLACK);
-
+    PieceType pieces[NCOL] = {
+        ROOK, KNIGHT, BISHOP, QUEEN, KING, BISHOP, KNIGHT, ROOK};
     for (int x = 0; x < NCOL; x++) {
-        _board[1][x] = new Pawn("\u2659", WHITE);
-        _board[6][x] = new Pawn("\u265F", BLACK);
-    }
+        _board[0][x] = this->create_piece(pieces[x], WHITE);
+        _board[1][x] = this->create_piece(PAWN, WHITE);
 
-    for (int i = 0; i < NROW; i++) {
-        for (int j = 0; j < NCOL; j++) {
-            if (_board[i][j] == nullptr)
-                _position.board[i][j] = {.type = NIL, .color = NOCOLOR};
-            else
-                _position.board[i][j] = {.type = _board[i][j]->type,
-                                         .color = _board[i][j]->color};
+        _board[7][x] = this->create_piece(pieces[x], BLACK);
+        _board[6][x] = this->create_piece(PAWN, BLACK);
+
+        for (int i = 0; i < NROW; i++) {
+            for (int j = 0; j < NCOL; j++) {
+                if (_board[i][j] == nullptr)
+                    _position.board[i][j] = {.type = NIL, .color = NOCOLOR};
+                else
+                    _position.board[i][j] = {.type = _board[i][j]->type,
+                                             .color = _board[i][j]->color};
+            }
         }
+        _position.turn = WHITE;
+        _position.fifty_move_rule = 0;
+        _position.white_castle = true;
+        _position.black_castle = true;
     }
-    _position.turn = WHITE;
-    _position.fifty_move_rule = 0;
-    _position.white_castle = true;
-    _position.black_castle = true;
-};
+}
 
 Board::~Board()
 {
@@ -111,7 +97,7 @@ void Board::move(Move const &move)
             _position.black_castle = false;
     }
 
-    if (this->is_capture(move))
+    if (this->is_capture(move) || piece->type == PAWN)
         _position.fifty_move_rule = 0;
     else
         _position.fifty_move_rule++;
@@ -128,11 +114,9 @@ void Board::move(Move const &move)
 
 bool Board::is_pseudo_legal(Move const &move) const
 {
-    Piece *piece = _board[move.from.x][move.from.y];
-    if (piece == nullptr) {
-        std::cout << "no_piece" << std::endl;  // TODO: error
+    Piece *piece = _board[move.from.y][move.from.x];
+    if (piece == nullptr)
         return false;
-    }
     return piece->is_pseudo_legal(this->get_position(), move.from, move.to);
 }
 
@@ -155,10 +139,11 @@ bool Board::is_capture(Move const &move) const
 
 Square const Board::find_king(Color color) const
 {
-    for (int i = 0; i < NROW; i++) {
-        for (int j = 0; j < NCOL; j++) {
-            if (_board[i][j]->type == KING && _board[i][j]->color == color)
-                return Square(i, j);
+    for (int y = 0; y < NROW; y++) {
+        for (int x = 0; x < NCOL; x++) {
+            if (_board[y][x] && _board[y][x]->type == KING
+                && _board[y][x]->color == color)
+                return Square(x, y);
         }
     }
     throw std::runtime_error("King not found");
@@ -185,17 +170,17 @@ Piece *Board::create_piece(PieceType type, Color color)
 {
     switch (type) {
     case PAWN:
-        return new Pawn("\u2659", color);
+        return new Pawn(color);
     case KNIGHT:
-        return new Knight("\u2658", color);
+        return new Knight(color);
     case BISHOP:
-        return new Bishop("\u2657", color);
+        return new Bishop(color);
     case ROOK:
-        return new Rook("\u2656", color);
+        return new Rook(color);
     case QUEEN:
-        return new Queen("\u2655", color);
+        return new Queen(color);
     case KING:
-        return new King("\u2654", color);
+        return new King(color);
     default:
         return nullptr;
     }

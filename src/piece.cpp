@@ -13,6 +13,30 @@ void Piece::print() const
     std::cout << name;
 }
 
+King::King(Color color)
+    : Piece(KING, (color == WHITE ? "\u2654" : "\u265a"), color)
+{}
+
+Queen::Queen(Color color)
+    : Piece(QUEEN, (color == WHITE ? "\u2655" : "\u265b"), color)
+{}
+
+Rook::Rook(Color color)
+    : Piece(ROOK, (color == WHITE ? "\u2656" : "\u265c"), color)
+{}
+
+Bishop::Bishop(Color color)
+    : Piece(BISHOP, (color == WHITE ? "\u2657" : "\u265d"), color)
+{}
+
+Knight::Knight(Color color)
+    : Piece(KNIGHT, (color == WHITE ? "\u2658" : "\u265e"), color)
+{}
+
+Pawn::Pawn(Color color)
+    : Piece(PAWN, (color == WHITE ? "\u2659" : "\u265f"), color)
+{}
+
 static bool is_pseudo_legal_diagonally(Position const &position,
                                        Square const &from, Square const &to)
 {
