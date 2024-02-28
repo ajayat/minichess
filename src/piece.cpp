@@ -1,7 +1,8 @@
 #include "piece.hpp"
 
-Piece::Piece(PieceType type, std::string const name, Color color)
-    : type(type), name(name), color(color)
+Piece::Piece(PieceType type, std::string const name, Color color,
+             std::string const symbol)
+    : type(type), name(name), color(color), _symbol(symbol)
 {}
 
 Piece::Piece(Piece const &other)
@@ -13,36 +14,44 @@ void Piece::print() const
     std::cout << name;
 }
 
+std::string Piece::to_pgn(bool view_color) const
+{
+    std::string c = "";
+    if (view_color)
+        c = (color == WHITE) ? "w" : "b";
+
+    return c + _symbol;
+}
+
 King::King(Color color)
-    : Piece(KING, (color == WHITE ? "\u2654" : "\u265a"), color)
+    : Piece(KING, (color == WHITE ? "\u2654" : "\u265a"), color, "K")
 {}
 
 Queen::Queen(Color color)
-    : Piece(QUEEN, (color == WHITE ? "\u2655" : "\u265b"), color)
+    : Piece(QUEEN, (color == WHITE ? "\u2655" : "\u265b"), color, "Q")
 {}
 
 Rook::Rook(Color color)
-    : Piece(ROOK, (color == WHITE ? "\u2656" : "\u265c"), color)
+    : Piece(ROOK, (color == WHITE ? "\u2656" : "\u265c"), color, "R")
 {}
 
 Bishop::Bishop(Color color)
-    : Piece(BISHOP, (color == WHITE ? "\u2657" : "\u265d"), color)
+    : Piece(BISHOP, (color == WHITE ? "\u2657" : "\u265d"), color, "B")
 {}
 
 Knight::Knight(Color color)
-    : Piece(KNIGHT, (color == WHITE ? "\u2658" : "\u265e"), color)
+    : Piece(KNIGHT, (color == WHITE ? "\u2658" : "\u265e"), color, "N")
 {}
 
 Pawn::Pawn(Color color)
-    : Piece(PAWN, (color == WHITE ? "\u2659" : "\u265f"), color)
+    : Piece(PAWN, (color == WHITE ? "\u2659" : "\u265f"), color, "P")
 {}
 
-static bool is_pseudo_legal_diagonally(Position const &position,
-                                       Square const &from, Square const &to)
+bool is_pseudo_legal_diagonally(Position const &position, Square const &from,
+                                Square const &to)
 {
     if (std::abs(from.x - to.x) != std::abs(from.y - to.y))
         return false;
-    Color color = position.board[from.y][from.x].color;
     int step_x = (to.x - from.x) > 0 ? 1 : -1;
     int step_y = (to.y - from.y) > 0 ? 1 : -1;
     int x = from.x + step_x;
@@ -54,7 +63,7 @@ static bool is_pseudo_legal_diagonally(Position const &position,
         x += step_x;
         y += step_y;
     }
-    return position.board[to.y][to.x].color != color;
+    return true;
 }
 
 bool is_pseudo_legal_horizontally(Position const &position, Square const &from,
@@ -62,7 +71,6 @@ bool is_pseudo_legal_horizontally(Position const &position, Square const &from,
 {
     if (from.y != to.y || from.x == to.x)
         return false;
-    Color color = position.board[from.y][from.x].color;
     int step = (to.x - from.x) > 0 ? 1 : -1;
     int x = from.x + step;
 
@@ -71,7 +79,7 @@ bool is_pseudo_legal_horizontally(Position const &position, Square const &from,
             return false;
         x += step;
     }
-    return position.board[to.y][to.x].color != color;
+    return true;
 }
 
 bool is_pseudo_legal_vertically(Position const &position, Square const &from,
@@ -79,7 +87,6 @@ bool is_pseudo_legal_vertically(Position const &position, Square const &from,
 {
     if (from.x != to.x || from.y == to.y)
         return false;
-    Color color = position.board[from.y][from.x].color;
     int step = (to.y - from.y) > 0 ? 1 : -1;
     int y = from.y + step;
 
@@ -88,90 +95,97 @@ bool is_pseudo_legal_vertically(Position const &position, Square const &from,
             return false;
         y += step;
     }
-    return position.board[to.y][to.x].color != color;
+    return true;
 }
 
-bool King::is_castling(Position const &position, Square const &from,
+bool King::is_castling(Position const &pos, Square const &from,
                        Square const &to) const
 {
-    if (position.board[from.y][from.x].color == WHITE) {
-        if (from == Square("e1") && to == Square("g1")
-            || from == Square("e1") && to == Square("c1"))
-            return position.white_castle;
-    } else {
-        if (from == Square("e8") && to == Square("g8")
-            || from == Square("e8") && to == Square("c8"))
-            return position.black_castle;
-    }
+    if (pos.board[to.y][to.x].color != NOCOLOR)
+        return false;
+
+    if (pos.board[from.y][from.x].color == WHITE && from.name == "e1"
+        && (to.name == "g1" || to.name == "c1"))
+        return pos.white_castle && is_pseudo_legal_horizontally(pos, from, to);
+
+    else if (from.name == "e8" && (to.name == "g8" || to.name == "c8"))
+        return pos.black_castle && is_pseudo_legal_horizontally(pos, from, to);
     return false;
 }
 
-bool King::is_pseudo_legal(Position const &position, Square const &from,
+bool King::is_pseudo_legal(Position const &pos, Square const &from,
                            Square const &to) const
 {
-    Color color = position.board[from.y][from.x].color;
-    if (std::abs(from.x - to.x) ^ std::abs(from.y - to.y))
-        return position.board[to.y][to.x].color != color;
+    Color color = pos.board[from.y][from.x].color;
+    if (std::abs(from.x - to.x) <= 1 && std::abs(from.y - to.y) <= 1)
+        return pos.board[to.y][to.x].color != color;
 
-    return this->is_castling(position, from, to);
+    return is_castling(pos, from, to);
 }
 
-bool Queen::is_pseudo_legal(Position const &position, Square const &from,
+bool Queen::is_pseudo_legal(Position const &pos, Square const &from,
                             Square const &to) const
 {
-    return is_pseudo_legal_diagonally(position, from, to)
-           || is_pseudo_legal_horizontally(position, from, to)
-           || is_pseudo_legal_vertically(position, from, to);
+    if (pos.board[to.y][to.x].color == pos.board[from.y][from.x].color)
+        return false;
+    return is_pseudo_legal_diagonally(pos, from, to)
+           || is_pseudo_legal_horizontally(pos, from, to)
+           || is_pseudo_legal_vertically(pos, from, to);
 }
 
-bool Rook::is_pseudo_legal(Position const &position, Square const &from,
+bool Rook::is_pseudo_legal(Position const &pos, Square const &from,
                            Square const &to) const
 {
-    return is_pseudo_legal_horizontally(position, from, to)
-           || is_pseudo_legal_vertically(position, from, to);
+    if (pos.board[to.y][to.x].color == pos.board[from.y][from.x].color)
+        return false;
+    return is_pseudo_legal_horizontally(pos, from, to)
+           || is_pseudo_legal_vertically(pos, from, to);
 }
 
-bool Bishop::is_pseudo_legal(Position const &position, Square const &from,
+bool Bishop::is_pseudo_legal(Position const &pos, Square const &from,
                              Square const &to) const
 {
-    return is_pseudo_legal_diagonally(position, from, to);
+    if (pos.board[to.y][to.x].color == pos.board[from.y][from.x].color)
+        return false;
+    return is_pseudo_legal_diagonally(pos, from, to);
 }
 
-bool Knight::is_pseudo_legal(Position const &position, Square const &from,
+bool Knight::is_pseudo_legal(Position const &pos, Square const &from,
                              Square const &to) const
 {
-    Color color = position.board[from.y][from.x].color;
+    Color color = pos.board[from.y][from.x].color;
     int dx = std::abs(from.x - to.x);
     int dy = std::abs(from.y - to.y);
     if ((dx == 1 && dy == 2) || (dx == 2 && dy == 1))
-        return position.board[to.y][to.x].color != color;
+        return pos.board[to.y][to.x].color != color;
     return false;
 }
 
-bool Pawn::is_en_passant(Position const &position, Square const &from,
+bool Pawn::is_en_passant(Position const &pos, Square const &from,
                          Square const &to) const
 {
     if (std::abs(to.y - from.y) == 1 && std::abs(to.x - from.x) == 1)
-        return position.en_passant != Square(0, 0) && to == position.en_passant;
+        return pos.en_passant != Square(0, 0) && to == pos.en_passant;
     return false;
 }
 
-bool Pawn::is_pseudo_legal(Position const &position, Square const &from,
+bool Pawn::is_pseudo_legal(Position const &pos, Square const &from,
                            Square const &to) const
 {
-    Color color = position.board[from.y][from.x].color;
+    Color color = pos.board[from.y][from.x].color;
     int dy = to.y - from.y;
     int dx = to.x - from.x;
     if (color == WHITE) {
         if ((dy == 1 && dx == 0) || (dy == 2 && dx == 0 && from.y == 1))
-            return position.board[to.y][to.x].color == NOCOLOR;  // move
+            return pos.board[to.y][to.x].color == NOCOLOR;  // move
         if (dy == 1 && std::abs(dx) == 1)
-            return position.board[to.y][to.x].color == BLACK;  // capture
-    } else {
-        if ((dy == -1 && dx == 0) || (dy == -2 && dx == 0 && from.y == 6))
-            return position.board[to.y][to.x].color == NOCOLOR;  // move
-        if (dy == -1 && std::abs(dx) == 1)
-            return position.board[to.y][to.x].color == WHITE;  // capture
+            return pos.board[to.y][to.x].color == BLACK;  // capture
     }
-    return this->is_en_passant(position, from, to);
+    else {
+        if ((dy == -1 && dx == 0) || (dy == -2 && dx == 0 && from.y == 6))
+            return pos.board[to.y][to.x].color == NOCOLOR;  // move
+        if (dy == -1 && std::abs(dx) == 1)
+            return pos.board[to.y][to.x].color == WHITE;  // capture
+    }
+    return is_en_passant(pos, from, to);
 }

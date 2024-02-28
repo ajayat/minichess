@@ -48,5 +48,5 @@ class Human : public Player
     ResponseStatus wait(std::vector<Position> const &_history) override;
 
   private:
-    bool check(std::string const &uci) const;
+    bool check(std::string &uci);
 };

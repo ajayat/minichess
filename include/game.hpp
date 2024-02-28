@@ -25,6 +25,7 @@ class Game
     Player *current() const;
     Player *opponent(Player *player) const;
     GameStatus status() const;
+    std::string const get_result() const;
 
   private:
     GameStatus move(Move const &move);

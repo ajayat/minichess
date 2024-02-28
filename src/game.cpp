@@ -16,7 +16,7 @@ void Game::show() const
 void Game::wait(Player *player)
 {
     ResponseStatus response = player->wait(_history);
-    _status = this->apply(response);
+    _status = apply(response);
 }
 
 Player *Game::current() const
@@ -37,21 +37,22 @@ GameStatus Game::status() const
 GameStatus Game::move(Move const &move)
 {
     if (!_board.is_legal(move)) {
-        std::cout << "Invalid move." << std::endl;
+        std::cout << "Illegal move." << std::endl;
         return ONGOING;
     }
     _board.move(move);
     _history.emplace_back(_board.get_position());
 
-    Player *opponent = this->opponent(this->current());
-    if (this->is_checkmate(opponent))
-        return (opponent == _black) ? WHITE_WIN : BLACK_WIN;
-    else if (this->is_stalemate(opponent))
-        return STALEMATE;
-    else if (this->fifty_move_rule())
+    // TODO fix this
+    Player *opponent = this->opponent(current());
+    if (fifty_move_rule())
         return FIFTY_MOVE_RULE;
-    else if (this->threefold_repetition())
+    if (threefold_repetition())
         return THREEFOLD_REPETITION;
+    if (is_checkmate(opponent))
+        return (opponent == _black) ? WHITE_WIN : BLACK_WIN;
+    if (is_stalemate(opponent))
+        return STALEMATE;
     return ONGOING;
 }
 
@@ -81,10 +82,9 @@ GameStatus Game::cancel()
 
 GameStatus Game::draw()
 {
-    if (this->fifty_move_rule() || this->threefold_repetition())
+    if (fifty_move_rule() || threefold_repetition())
         return ABORTED;
-    std::cout << this->opponent(this->current())->name()
-              << ", accept draw ? (y/n): ";
+    std::cout << opponent(current())->name() << ", accept draw ? (y/n): ";
 
     char answer;
     std::cin >> answer;
@@ -127,13 +127,31 @@ GameStatus Game::apply(ResponseStatus const &response)
     case QUIT:
         return ABORTED;
     case CANCEL:
-        return this->cancel();
+        return cancel();
     case DRAW:
-        return this->draw();
+        return draw();
     case RESIGN:
-        return (this->current()->color() == WHITE) ? BLACK_WIN : WHITE_WIN;
+        return (current()->color() == WHITE) ? BLACK_WIN : WHITE_WIN;
     case MOVE:
-        return this->move(response.move);
+        return move(response.move);
     }
     return ONGOING;
+}
+
+std::string const Game::get_result() const
+{
+    switch (_status) {
+    case WHITE_WIN:
+        return _board.to_pgn() + " 1-0";
+    case BLACK_WIN:
+        return _board.to_pgn() + " 0-1";
+    case FIFTY_MOVE_RULE:
+    case THREEFOLD_REPETITION:
+    case STALEMATE:
+        return _board.to_pgn() + " 1/2-1/2";
+    case ABORTED:
+        return _board.to_pgn() + " ?-?";
+    default:
+        return "";
+    }
 }

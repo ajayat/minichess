@@ -9,6 +9,7 @@ file(GLOB_RECURSE SOURCES src/*.cpp)
 
 add_custom_target(docs
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_SOURCE_DIR}/docs
-    COMMAND doxygen Doxyfile)
+    COMMAND doxygen Doxyfile
+)
 
 add_executable(MiniChess ${SOURCES})

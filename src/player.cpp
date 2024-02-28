@@ -25,8 +25,14 @@ ResponseStatus Engine::wait(std::vector<Position> const &_history)
 
 Human::Human(std::string const name, Color color) : Player(name, color) {}
 
-bool Human::check(std::string const &uci) const
+bool Human::check(std::string &uci)
 {
+    // Transform castling notation into UCI
+    if (uci == "O-O")
+        uci = (color() == WHITE) ? "e1g1" : "e8g8";
+    else if (uci == "O-O-O")
+        uci = (color() == WHITE) ? "e1c1" : "e8c8";
+
     try {
         Move move(uci);
         return true;

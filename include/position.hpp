@@ -14,7 +14,9 @@ struct PieceInfo {
 /**
  * A square describe a location on the board
  */
-struct Square {
+class Square
+{
+  public:
     int x;  // file
     int y;  // rank
     std::string name;

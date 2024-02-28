@@ -60,10 +60,10 @@ std::string const Move::to_uci() const
 
 bool Position::operator==(Position const &other) const
 {
-    if (turn != other.turn || fifty_move_rule != other.fifty_move_rule
-        || white_castle != other.white_castle
+    if (turn != other.turn || white_castle != other.white_castle
         || black_castle != other.black_castle || en_passant != other.en_passant)
         return false;
+
     for (int i = 0; i < 8; i++)
         for (int j = 0; j < 8; j++)
             if (board[i][j].type != other.board[i][j].type

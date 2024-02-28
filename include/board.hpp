@@ -18,6 +18,7 @@ class Board
     Color turn() const;
     Position const get_position() const;
     void set_position(Position const &position);
+    std::string const to_pgn() const;
 
     bool is_pseudo_legal(Move const &move) const;
     bool is_legal(Move const &move);
@@ -27,8 +28,9 @@ class Board
     Piece *operator()(Square const &square) const;
 
   private:
-    Square const find_king(Color color) const;
+    bool is_attacked(Square const &square) const;
     Piece *create_piece(PieceType type, Color color);
+    void _move(Square const &from, Square const &to);
 
   private:
     Piece *_board[NROW][NCOL];
