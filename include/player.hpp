@@ -46,6 +46,7 @@ class Human : public Player
     ~Human() override = default;
 
     ResponseStatus wait(std::vector<Position> const &_history) override;
+    PieceType wait_promotion();
 
   private:
     bool check(std::string &uci);

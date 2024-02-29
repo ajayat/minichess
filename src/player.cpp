@@ -1,4 +1,5 @@
 #include <iostream>
+#include <map>
 
 #include "player.hpp"
 
@@ -61,4 +62,19 @@ ResponseStatus Human::wait(std::vector<Position> const &_history)
     while (!check(uci));
 
     return ResponseStatus{MOVE, uci};
+}
+
+PieceType Human::wait_promotion()
+{
+    std::map<char, PieceType> map = {
+        {'Q', QUEEN}, {'R', ROOK}, {'B', BISHOP}, {'N', KNIGHT}};
+    char p;
+    while (true) {
+        std::cout << "Promote to (Q/R/B/N): ";
+        std::cin >> p;
+        std::cout << "char: " << p << std::endl;
+        if (map.find(p) != map.end())
+            return map[p];
+        std::cout << "Invalid promotion." << std::endl;
+    }
 }

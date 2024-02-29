@@ -1,7 +1,8 @@
-#include "position.hpp"
-
+#include <map>
 #include <stdexcept>
 #include <string>
+
+#include "position.hpp"
 
 Square::Square() noexcept : x{-1}, y{-1}, name("EMPTY") {}
 
@@ -40,14 +41,10 @@ Move::Move(std::string const uci)
     to = uci.substr(2, 2);
 
     if (uci.size() == 5) {
-        if (uci[4] == 'q')
-            promotion = QUEEN;
-        else if (uci[4] == 'r')
-            promotion = ROOK;
-        else if (uci[4] == 'b')
-            promotion = BISHOP;
-        else if (uci[4] == 'n')
-            promotion = KNIGHT;
+        std::map<char, PieceType> map = {
+            {'q', QUEEN}, {'r', ROOK}, {'b', BISHOP}, {'n', KNIGHT}};
+        if (map.find(uci[4]) != map.end())
+            promotion = map[uci[4]];
         else
             throw std::invalid_argument("Invalid promotion");
     }
@@ -55,7 +52,12 @@ Move::Move(std::string const uci)
 
 std::string const Move::to_uci() const
 {
-    return from.name + to.name;
+    if (promotion == NIL)
+        return from.name + to.name;
+
+    std::map<PieceType, char> map = {
+        {QUEEN, 'q'}, {ROOK, 'r'}, {BISHOP, 'b'}, {KNIGHT, 'n'}};
+    return from.name + to.name + map[promotion];
 }
 
 bool Position::operator==(Position const &other) const

@@ -24,6 +24,7 @@ class Board
     bool is_legal(Move const &move);
     bool is_capture(Move const &move) const;
     bool is_checked(Color color) const;
+    bool is_promotion(Move const &move) const;
 
     Piece *operator()(Square const &square) const;
 

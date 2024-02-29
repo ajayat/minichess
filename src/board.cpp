@@ -105,15 +105,17 @@ void Board::move(Move const &move)
         else if (move.promotion != NIL) {  // pawn promotion
             delete _board[from.y][from.x];
             _board[from.y][from.x] = create_piece(move.promotion, piece->color);
+            _position.board[from.y][from.x] = {.type = move.promotion,
+                                               .color = piece->color};
         }
         else if (std::abs(from.y - to.y) == 2)  // pawn double move
             _position.en_passant = Square(from.x, (from.y + to.y) / 2);
     }
     else if (piece->type == KING && abs(from.x - to.x) == 2) {
-        if (to.x == 2)  // small castle
-            _move(Square(0, from.y), Square(2, from.y));
-        else  // big castle
-            _move(Square(7, from.y), Square(4, from.y));
+        if (to.x == 2)  // big castle
+            _move(Square(0, from.y), Square(3, from.y));
+        else  // small castle
+            _move(Square(7, from.y), Square(5, from.y));
 
         if (piece->color == WHITE)
             _position.white_castle = false;
@@ -182,6 +184,12 @@ bool Board::is_checked(Color color) const
         }
     }
     throw std::runtime_error("King not found");
+}
+
+bool Board::is_promotion(Move const &move) const
+{
+    Piece *piece = _board[move.from.y][move.from.x];
+    return piece->type == PAWN && (move.to.y == 0 || move.to.y == 7);
 }
 
 Position const Board::get_position() const

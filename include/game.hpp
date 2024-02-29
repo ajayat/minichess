@@ -28,10 +28,10 @@ class Game
     std::string const get_result() const;
 
   private:
-    GameStatus move(Move const &move);
+    GameStatus move(Move move);
     GameStatus cancel();
     GameStatus draw();
-    GameStatus apply(ResponseStatus const &response);
+    GameStatus apply(ResponseStatus &response);
 
     bool has_legal_moves(Player *player);
     bool is_stalemate(Player *player);

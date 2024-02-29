@@ -34,12 +34,15 @@ GameStatus Game::status() const
     return _status;
 }
 
-GameStatus Game::move(Move const &move)
+GameStatus Game::move(Move move)
 {
     if (!_board.is_legal(move)) {
         std::cout << "Illegal move." << std::endl;
         return ONGOING;
     }
+    if (_board.is_promotion(move) && move.promotion == NIL)
+        move.promotion = static_cast<Human *>(current())->wait_promotion();
+
     _board.move(move);
     _history.emplace_back(_board.get_position());
 
@@ -121,7 +124,7 @@ bool Game::is_checkmate(Player *player)
     return _board.is_checked(player->color()) && !has_legal_moves(player);
 }
 
-GameStatus Game::apply(ResponseStatus const &response)
+GameStatus Game::apply(ResponseStatus &response)
 {
     switch (response.status) {
     case QUIT:
