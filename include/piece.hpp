@@ -20,8 +20,7 @@ class Piece
     std::string const name;
 
   public:
-    Piece(PieceType type, std::string const name, Color color,
-          std::string const symbol);
+    Piece(PieceType type, std::string const name, Color color);
     Piece(Piece const &other);
     virtual ~Piece() = default;
 
@@ -29,9 +28,6 @@ class Piece
     void print() const;
     virtual bool is_pseudo_legal(Position const &position, Square const &from,
                                  Square const &to) const = 0;
-
-  protected:
-    std::string _symbol;
 };
 
 class King : public Piece

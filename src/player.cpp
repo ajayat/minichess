@@ -72,7 +72,6 @@ PieceType Human::wait_promotion()
     while (true) {
         std::cout << "Promote to (Q/R/B/N): ";
         std::cin >> p;
-        std::cout << "char: " << p << std::endl;
         if (map.find(p) != map.end())
             return map[p];
         std::cout << "Invalid promotion." << std::endl;

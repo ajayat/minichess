@@ -40,14 +40,14 @@ GameStatus Game::move(Move move)
         std::cout << "Illegal move." << std::endl;
         return ONGOING;
     }
+    Player *player = current();
     if (_board.is_promotion(move) && move.promotion == NIL)
-        move.promotion = static_cast<Human *>(current())->wait_promotion();
+        move.promotion = static_cast<Human *>(player)->wait_promotion();
 
     _board.move(move);
     _history.emplace_back(_board.get_position());
 
-    // TODO fix this
-    Player *opponent = this->opponent(current());
+    Player *opponent = this->opponent(player);
     if (fifty_move_rule())
         return FIFTY_MOVE_RULE;
     if (threefold_repetition())

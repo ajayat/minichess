@@ -1,8 +1,7 @@
 #include "piece.hpp"
 
-Piece::Piece(PieceType type, std::string const name, Color color,
-             std::string const symbol)
-    : type(type), name(name), color(color), _symbol(symbol)
+Piece::Piece(PieceType type, std::string const name, Color color)
+    : type(type), name(name), color(color)
 {}
 
 Piece::Piece(Piece const &other)
@@ -19,32 +18,31 @@ std::string Piece::to_pgn(bool view_color) const
     std::string c = "";
     if (view_color)
         c = (color == WHITE) ? "w" : "b";
-
-    return c + _symbol;
+    return (type == NIL) ? "" : c + " PNBRQK"[type];
 }
 
 King::King(Color color)
-    : Piece(KING, (color == WHITE ? "\u2654" : "\u265a"), color, "K")
+    : Piece(KING, (color == WHITE ? "\u2654" : "\u265a"), color)
 {}
 
 Queen::Queen(Color color)
-    : Piece(QUEEN, (color == WHITE ? "\u2655" : "\u265b"), color, "Q")
+    : Piece(QUEEN, (color == WHITE ? "\u2655" : "\u265b"), color)
 {}
 
 Rook::Rook(Color color)
-    : Piece(ROOK, (color == WHITE ? "\u2656" : "\u265c"), color, "R")
+    : Piece(ROOK, (color == WHITE ? "\u2656" : "\u265c"), color)
 {}
 
 Bishop::Bishop(Color color)
-    : Piece(BISHOP, (color == WHITE ? "\u2657" : "\u265d"), color, "B")
+    : Piece(BISHOP, (color == WHITE ? "\u2657" : "\u265d"), color)
 {}
 
 Knight::Knight(Color color)
-    : Piece(KNIGHT, (color == WHITE ? "\u2658" : "\u265e"), color, "N")
+    : Piece(KNIGHT, (color == WHITE ? "\u2658" : "\u265e"), color)
 {}
 
 Pawn::Pawn(Color color)
-    : Piece(PAWN, (color == WHITE ? "\u2659" : "\u265f"), color, "P")
+    : Piece(PAWN, (color == WHITE ? "\u2659" : "\u265f"), color)
 {}
 
 bool is_pseudo_legal_diagonally(Position const &position, Square const &from,

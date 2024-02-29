@@ -29,7 +29,7 @@ class Board
     Piece *operator()(Square const &square) const;
 
   private:
-    bool is_attacked(Square const &square) const;
+    bool is_attacked(Color color, Square const &square) const;
     Piece *create_piece(PieceType type, Color color);
     void _move(Square const &from, Square const &to);
 

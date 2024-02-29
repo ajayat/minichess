@@ -103,21 +103,24 @@ void Board::move(Move const &move)
             _position.board[from.y][to.x] = {.type = NIL, .color = NOCOLOR};
         }
         else if (move.promotion != NIL) {  // pawn promotion
+            Color color = piece->color;
             delete _board[from.y][from.x];
-            _board[from.y][from.x] = create_piece(move.promotion, piece->color);
+            _board[from.y][from.x] = create_piece(move.promotion, color);
             _position.board[from.y][from.x] = {.type = move.promotion,
-                                               .color = piece->color};
+                                               .color = color};
         }
         else if (std::abs(from.y - to.y) == 2)  // pawn double move
             _position.en_passant = Square(from.x, (from.y + to.y) / 2);
     }
-    else if (piece->type == KING && abs(from.x - to.x) == 2) {
-        if (to.x == 2)  // big castle
-            _move(Square(0, from.y), Square(3, from.y));
-        else  // small castle
-            _move(Square(7, from.y), Square(5, from.y));
-
-        if (piece->color == WHITE)
+    else if (piece->type == KING) {
+        King *king = static_cast<King *>(piece);
+        if (king->is_castling(get_position(), from, to)) {
+            if (to.x == 2)  // big castle
+                _move(Square(0, from.y), Square(3, from.y));
+            else  // small castle
+                _move(Square(7, from.y), Square(5, from.y));
+        }
+        if (king->color == WHITE)
             _position.white_castle = false;
         else
             _position.black_castle = false;
@@ -144,12 +147,14 @@ bool Board::is_legal(Move const &move)
     if (!is_pseudo_legal(move))
         return false;
 
-    Piece *piece = _board[move.from.y][move.from.x];
-    if (piece->type == KING && abs(move.from.x - move.to.x) == 2) {
+    Square from{move.from}, to{move.to};
+    Piece *piece = _board[from.y][from.x];
+    if (piece->type == KING && abs(from.x - to.x) == 2) {
+        Color color = turn();
         return (  // Test if king is not attacked during castling
-          !is_attacked(Square(move.from.x, move.from.y))
-          && !is_attacked(Square((move.to.x + move.from.x) / 2, move.from.y))
-          && !is_attacked(Square(move.to.x, move.from.y)));
+          !is_attacked(color, Square(from.x, from.y))
+          && !is_attacked(color, Square((from.x + to.x) / 2, from.y))
+          && !is_attacked(color, to));
     }
     Position position = get_position();
     this->move(move);  // Simulate move
@@ -163,11 +168,12 @@ bool Board::is_capture(Move const &move) const
     return _board[move.to.y][move.to.x] && is_pseudo_legal(move);
 }
 
-bool Board::is_attacked(Square const &square) const
+bool Board::is_attacked(Color color, Square const &square) const
 {
     for (int y = 0; y < NROW; y++) {
         for (int x = 0; x < NCOL; x++) {
-            if (is_capture(Move(Square(x, y), square)))
+            if (_board[y][x] && _board[y][x]->color != color
+                && is_pseudo_legal(Move(Square(x, y), square)))
                 return true;
         }
     }
@@ -180,7 +186,7 @@ bool Board::is_checked(Color color) const
         for (int x = 0; x < NCOL; x++) {
             if (_board[y][x] && _board[y][x]->type == KING
                 && _board[y][x]->color == color)
-                return is_attacked(Square(x, y));
+                return is_attacked(color, Square(x, y));
         }
     }
     throw std::runtime_error("King not found");
