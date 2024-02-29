@@ -13,14 +13,6 @@ void Piece::print() const
     std::cout << name;
 }
 
-std::string Piece::to_pgn(bool view_color) const
-{
-    std::string c = "";
-    if (view_color)
-        c = (color == WHITE) ? "w" : "b";
-    return (type == NIL) ? "" : c + " PNBRQK"[type];
-}
-
 King::King(Color color)
     : Piece(KING, (color == WHITE ? "\u2654" : "\u265a"), color)
 {}
@@ -102,12 +94,13 @@ bool King::is_castling(Position const &pos, Square const &from,
     if (pos.board[to.y][to.x].color != NOCOLOR)
         return false;
 
-    if (pos.board[from.y][from.x].color == WHITE && from.name == "e1"
-        && (to.name == "g1" || to.name == "c1"))
-        return pos.white_castle && is_pseudo_legal_horizontally(pos, from, to);
+    if (from.name == "e1" && (to.name == "g1" || to.name == "c1"))
+        return pos.castling[WHITE][to.name == "c1"]
+               && is_pseudo_legal_horizontally(pos, from, to);
 
     else if (from.name == "e8" && (to.name == "g8" || to.name == "c8"))
-        return pos.black_castle && is_pseudo_legal_horizontally(pos, from, to);
+        return pos.castling[BLACK][to.name == "c8"]
+               && is_pseudo_legal_horizontally(pos, from, to);
     return false;
 }
 
@@ -163,7 +156,7 @@ bool Pawn::is_en_passant(Position const &pos, Square const &from,
                          Square const &to) const
 {
     if (std::abs(to.y - from.y) == 1 && std::abs(to.x - from.x) == 1)
-        return pos.en_passant != Square(0, 0) && to == pos.en_passant;
+        return pos.en_passant != Square() && to == pos.en_passant;
     return false;
 }
 

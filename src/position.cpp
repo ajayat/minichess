@@ -62,8 +62,11 @@ std::string const Move::to_uci() const
 
 bool Position::operator==(Position const &other) const
 {
-    if (turn != other.turn || white_castle != other.white_castle
-        || black_castle != other.black_castle || en_passant != other.en_passant)
+    if (turn != other.turn || en_passant != other.en_passant
+        || castling[0][0] != other.castling[0][0]
+        || castling[0][1] != other.castling[0][1]
+        || castling[1][0] != other.castling[1][0]
+        || castling[1][1] != other.castling[1][1])
         return false;
 
     for (int i = 0; i < 8; i++)
@@ -72,4 +75,54 @@ bool Position::operator==(Position const &other) const
                 || board[i][j].color != other.board[i][j].color)
                 return false;
     return true;
+}
+
+std::string const Position::to_pgn() const
+{
+    std::string pgn = "";
+    for (int y = 0; y < 8; y++) {
+        for (int x = 0; x < 8; x++) {
+            PieceInfo const &piece = board[y][x];
+            if (piece.type != NIL) {
+                pgn += (piece.color == WHITE) ? "w" : "b";
+                pgn += " PNBRQK"[piece.type];
+            }
+            pgn += ",";
+        }
+    }
+    return pgn;
+}
+
+std::string const Position::to_fen() const
+{
+    std::string fen = "";
+    for (int y = 0; y < 8; y++) {
+        int empty = 0;
+        for (int x = 0; x < 8; x++) {
+            PieceInfo const &piece = board[y][x];
+            if (piece.type == NIL) {
+                empty++;
+                continue;
+            }
+            if (empty > 0) {
+                fen += std::to_string(empty);
+                empty = 0;
+            }
+            fen += (piece.color == WHITE) ? " PNBRQK"[piece.type]
+                                          : " pnbrqk"[piece.type];
+        }
+        if (empty > 0)
+            fen += std::to_string(empty);
+        if (y < 7)
+            fen += "/";
+    }
+    fen += (turn == WHITE) ? " w " : " b ";
+    fen += (castling[0][0]) ? "K" : "";
+    fen += (castling[0][1]) ? "Q" : "";
+    fen += (castling[1][0]) ? "k" : "";
+    fen += (castling[1][1]) ? "q " : " ";
+    fen += (en_passant.name == "EMPTY") ? "-" : en_passant.name;
+    fen += " " + std::to_string(fifty_move_rule);
+    fen += " " + std::to_string(fullmove_number);
+    return fen;
 }

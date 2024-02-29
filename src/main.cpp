@@ -13,6 +13,6 @@ int main()
         game.wait(game.current());
         game.show();
     }
-    std::cout << std::endl << game.get_result() << std::endl;
+    std::cout << std::endl << game.result() << std::endl;
     return 0;
 }

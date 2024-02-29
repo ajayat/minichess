@@ -19,7 +19,7 @@ Color Player::color() const
 
 Engine::Engine(std::string const name, Color color) : Player(name, color) {}
 
-ResponseStatus Engine::wait(std::vector<Position> const &_history)
+ResponseStatus Engine::wait(Position const &position)
 {
     return ResponseStatus{QUIT};
 }
@@ -44,7 +44,7 @@ bool Human::check(std::string &uci)
     }
 }
 
-ResponseStatus Human::wait(std::vector<Position> const &_history)
+ResponseStatus Human::wait(Position const &position)
 {
     std::string uci;
     do {

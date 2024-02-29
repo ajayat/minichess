@@ -7,27 +7,29 @@ Board::Board() : _board{nullptr}
 {
     PieceType pieces[NCOL] = {
         ROOK, KNIGHT, BISHOP, QUEEN, KING, BISHOP, KNIGHT, ROOK};
+
     for (int x = 0; x < NCOL; x++) {
         _board[0][x] = create_piece(pieces[x], WHITE);
         _board[1][x] = create_piece(PAWN, WHITE);
-
         _board[7][x] = create_piece(pieces[x], BLACK);
         _board[6][x] = create_piece(PAWN, BLACK);
-
-        for (int i = 0; i < NROW; i++) {
-            for (int j = 0; j < NCOL; j++) {
-                if (_board[i][j] == nullptr)
-                    _position.board[i][j] = {.type = NIL, .color = NOCOLOR};
-                else
-                    _position.board[i][j] = {.type = _board[i][j]->type,
-                                             .color = _board[i][j]->color};
-            }
-        }
-        _position.turn = WHITE;
-        _position.fifty_move_rule = 0;
-        _position.white_castle = true;
-        _position.black_castle = true;
     }
+    for (int i = 0; i < NROW; i++) {
+        for (int j = 0; j < NCOL; j++) {
+            Piece *piece = _board[i][j];
+            if (piece)
+                _position.board[i][j] = {piece->type, piece->color};
+            else
+                _position.board[i][j] = {NIL, NOCOLOR};
+        }
+    }
+    _position.turn = WHITE;
+    _position.castling[WHITE][KINGSIDE] = true;
+    _position.castling[WHITE][QUEENSIDE] = true;
+    _position.castling[BLACK][KINGSIDE] = true;
+    _position.castling[BLACK][QUEENSIDE] = true;
+    _position.fifty_move_rule = 0;
+    _position.fullmove_number = 1;
 }
 
 Board::~Board()
@@ -88,41 +90,42 @@ void Board::_move(Square const &from, Square const &to)
     _board[to.y][to.x] = _board[from.y][from.x];
     _board[from.y][from.x] = nullptr;
     _position.board[to.y][to.x] = _position.board[from.y][from.x];
-    _position.board[from.y][from.x] = {.type = NIL, .color = NOCOLOR};
+    _position.board[from.y][from.x] = {NIL, NOCOLOR};
 }
 
 void Board::move(Move const &move)
 {
     Square from = move.from, to = move.to;
     Piece *piece = _board[from.y][from.x];
+    bool *castling = _position.castling[piece->color];
 
     if (piece->type == PAWN) {
         Pawn *pawn = static_cast<Pawn *>(piece);
         if (pawn->is_en_passant(get_position(), from, to)) {
             _board[from.y][to.x] = nullptr;  // remove captured pawn
-            _position.board[from.y][to.x] = {.type = NIL, .color = NOCOLOR};
+            _position.board[from.y][to.x] = {NIL, NOCOLOR};
         }
         else if (move.promotion != NIL) {  // pawn promotion
             Color color = piece->color;
             delete _board[from.y][from.x];
             _board[from.y][from.x] = create_piece(move.promotion, color);
-            _position.board[from.y][from.x] = {.type = move.promotion,
-                                               .color = color};
+            _position.board[from.y][from.x] = {move.promotion, color};
         }
     }
-    else if (piece->type == KING) {
+    if (piece->type == KING) {
         King *king = static_cast<King *>(piece);
         if (king->is_castling(get_position(), from, to)) {
-            if (to.x == 2)  // big castle
+
+            if (to.x == 2)  // queenside castle
                 _move(Square(0, from.y), Square(3, from.y));
-            else  // small castle
+            else  // kingside castle
                 _move(Square(7, from.y), Square(5, from.y));
         }
-        if (king->color == WHITE)
-            _position.white_castle = false;
-        else
-            _position.black_castle = false;
+        castling[KINGSIDE] = castling[QUEENSIDE] = false;
     }
+    if (piece->type == ROOK)
+        castling[from.x == 7] = false;
+
     if (is_capture(move) || piece->type == PAWN)
         _position.fifty_move_rule = 0;
     else
@@ -131,7 +134,10 @@ void Board::move(Move const &move)
     if (piece->type == PAWN && std::abs(from.y - to.y) == 2)  // double move
         _position.en_passant = Square(from.x, (from.y + to.y) / 2);
     else
-        _position.en_passant = Square(0, 0);
+        _position.en_passant = Square();
+
+    if (turn() == BLACK)
+        _position.fullmove_number++;
 
     _position.turn = (turn() == WHITE) ? BLACK : WHITE;
     _move(from, to);  // Move piece
@@ -237,16 +243,4 @@ void Board::set_position(Position const &position)
             _board[i][j] = create_piece(piece.type, piece.color);
         }
     }
-}
-
-std::string const Board::to_pgn() const
-{
-    std::string pgn = "";
-    for (int y = 0; y < NROW; y++) {
-        for (int x = 0; x < NCOL; x++) {
-            pgn += (_board[y][x]) ? _board[y][x]->to_pgn() : "";
-            pgn += ",";
-        }
-    }
-    return pgn;
 }

@@ -24,7 +24,6 @@ class Piece
     Piece(Piece const &other);
     virtual ~Piece() = default;
 
-    std::string to_pgn(bool view_color = true) const;
     void print() const;
     virtual bool is_pseudo_legal(Position const &position, Square const &from,
                                  Square const &to) const = 0;

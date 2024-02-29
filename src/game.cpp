@@ -15,7 +15,7 @@ void Game::show() const
 
 void Game::wait(Player *player)
 {
-    ResponseStatus response = player->wait(_history);
+    ResponseStatus response = player->wait(_board.get_position());
     _status = apply(response);
 }
 
@@ -141,19 +141,20 @@ GameStatus Game::apply(ResponseStatus &response)
     return ONGOING;
 }
 
-std::string const Game::get_result() const
+std::string const Game::result() const
 {
+    Position const &position = _board.get_position();
     switch (_status) {
     case WHITE_WIN:
-        return _board.to_pgn() + " 1-0";
+        return position.to_pgn() + " 1-0";
     case BLACK_WIN:
-        return _board.to_pgn() + " 0-1";
+        return position.to_pgn() + " 0-1";
     case FIFTY_MOVE_RULE:
     case THREEFOLD_REPETITION:
     case STALEMATE:
-        return _board.to_pgn() + " 1/2-1/2";
+        return position.to_pgn() + " 1/2-1/2";
     case ABORTED:
-        return _board.to_pgn() + " ?-?";
+        return position.to_pgn() + " ?-?";
     default:
         return "";
     }
