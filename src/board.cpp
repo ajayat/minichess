@@ -109,8 +109,6 @@ void Board::move(Move const &move)
             _position.board[from.y][from.x] = {.type = move.promotion,
                                                .color = color};
         }
-        else if (std::abs(from.y - to.y) == 2)  // pawn double move
-            _position.en_passant = Square(from.x, (from.y + to.y) / 2);
     }
     else if (piece->type == KING) {
         King *king = static_cast<King *>(piece);
@@ -130,8 +128,13 @@ void Board::move(Move const &move)
     else
         _position.fifty_move_rule++;
 
-    _move(from, to);  // Move piece
+    if (piece->type == PAWN && std::abs(from.y - to.y) == 2)  // double move
+        _position.en_passant = Square(from.x, (from.y + to.y) / 2);
+    else
+        _position.en_passant = Square(0, 0);
+
     _position.turn = (turn() == WHITE) ? BLACK : WHITE;
+    _move(from, to);  // Move piece
 }
 
 bool Board::is_pseudo_legal(Move const &move) const

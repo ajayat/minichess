@@ -170,6 +170,9 @@ bool Pawn::is_en_passant(Position const &pos, Square const &from,
 bool Pawn::is_pseudo_legal(Position const &pos, Square const &from,
                            Square const &to) const
 {
+    if (is_en_passant(pos, from, to))
+        return true;
+
     Color color = pos.board[from.y][from.x].color;
     int dy = to.y - from.y;
     int dx = to.x - from.x;
@@ -185,5 +188,5 @@ bool Pawn::is_pseudo_legal(Position const &pos, Square const &from,
         if (dy == -1 && std::abs(dx) == 1)
             return pos.board[to.y][to.x].color == WHITE;  // capture
     }
-    return is_en_passant(pos, from, to);
+    return false;
 }
