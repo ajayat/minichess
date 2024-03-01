@@ -21,7 +21,7 @@ class Player
     Player(std::string const &name, Color color);
     virtual ~Player() = default;
 
-    virtual ResponseStatus wait(Position const &position) = 0;
+    virtual ResponseStatus wait_move(Position const &position) = 0;
     std::string const &name() const;
     Color color() const;
 
@@ -34,9 +34,14 @@ class Engine : public Player
 {
   public:
     Engine(std::string const name, Color color);
-    ~Engine() override = default;
+    ~Engine() override;
 
-    ResponseStatus wait(Position const &position) override;
+    ResponseStatus wait_move(Position const &position) override;
+
+  private:
+    int _engine[2];
+    int _cli[2];
+    pid_t _pid;
 };
 
 class Human : public Player
@@ -45,7 +50,7 @@ class Human : public Player
     Human(std::string const name, Color color);
     ~Human() override = default;
 
-    ResponseStatus wait(Position const &position) override;
+    ResponseStatus wait_move(Position const &position) override;
     PieceType wait_promotion();
 
   private:

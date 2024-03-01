@@ -4,8 +4,8 @@
 
 int main()
 {
-    Player *white = new Human("Alice", WHITE);
-    Player *black = new Human("Bob", BLACK);
+    Player *white = new Human("Adrien", WHITE);
+    Player *black = new Human("Stockfish", BLACK);
     Game game(white, black);
     game.show();
 

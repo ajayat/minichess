@@ -1,7 +1,13 @@
 #include <iostream>
 #include <map>
+#include <string.h>
+#include <sys/wait.h>
+#include <thread>
+#include <unistd.h>
 
 #include "player.hpp"
+
+enum Pipe { READ, WRITE };
 
 Player::Player(std::string const &name, Color color)
     : _name(name), _color(color)
@@ -15,13 +21,6 @@ std::string const &Player::name() const
 Color Player::color() const
 {
     return _color;
-}
-
-Engine::Engine(std::string const name, Color color) : Player(name, color) {}
-
-ResponseStatus Engine::wait(Position const &position)
-{
-    return ResponseStatus{QUIT};
 }
 
 Human::Human(std::string const name, Color color) : Player(name, color) {}
@@ -44,7 +43,7 @@ bool Human::check(std::string &uci)
     }
 }
 
-ResponseStatus Human::wait(Position const &position)
+ResponseStatus Human::wait_move(Position const &position)
 {
     std::string uci;
     do {
@@ -76,4 +75,64 @@ PieceType Human::wait_promotion()
             return map[p];
         std::cout << "Invalid promotion." << std::endl;
     }
+}
+
+Engine::Engine(std::string const name, Color color) : Player(name, color)
+{
+    pipe(_engine);
+    pipe(_cli);
+
+    switch (_pid = fork()) {
+    case -1:
+        throw std::runtime_error("fork() failed");
+    case 0:
+        dup2(_engine[READ], STDIN_FILENO);
+        dup2(_cli[WRITE], STDOUT_FILENO);
+        execl("Stockfish/src/stockfish", "stockfish", NULL);
+        throw std::runtime_error("execl() failed");
+    default:
+        close(_cli[WRITE]);
+        close(_engine[READ]);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        // Send uci command
+        write(_engine[WRITE], "uci\n", 4);
+    }
+}
+
+Engine::~Engine()
+{
+    kill(_pid, SIGKILL);
+    close(_cli[READ]);
+    close(_engine[WRITE]);
+    waitpid(_pid, NULL, 0);
+}
+
+static std::string readline(int fd)
+{
+    char buf[1024];
+    int i = 0;
+    while (read(fd, &buf[i], sizeof(char)) > 0) {
+        if (buf[i++] == '\n')
+            return std::string(buf);
+    }
+    return std::string(buf);
+}
+
+ResponseStatus Engine::wait_move(Position const &position)
+{
+    // Send position
+    std::string fen = position.to_fen();
+    write(_engine[WRITE], "position fen ", 13);
+    write(_engine[WRITE], fen.c_str(), fen.size());
+    write(_engine[WRITE], "\n", 1);
+    // Send go command
+    write(_engine[WRITE], "go depth 10\n", 12);
+
+    // Read bestmove
+    std::string line;
+    while (!(line = readline(_cli[READ])).empty()) {
+        if (line.starts_with("bestmove"))
+            return ResponseStatus{MOVE, line.substr(9, 4)};
+    }
+    throw std::runtime_error("Engine cannnot find a move.");
 }

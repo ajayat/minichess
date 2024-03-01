@@ -19,6 +19,7 @@ class Game
 {
   public:
     Game(Player *white, Player *black);
+    ~Game();
 
     void show() const;
     void wait(Player *player);

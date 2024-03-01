@@ -35,7 +35,7 @@ Move::Move(Square from, Square to, PieceType promotion)
 Move::Move(std::string const uci)
 {
     if (uci.size() != 4 && uci.size() != 5)
-        throw std::invalid_argument("UCI must be 4 or 5 characters long");
+        throw std::invalid_argument("UCI must be 4 or 5 characters long" + uci);
 
     from = uci.substr(0, 2);
     to = uci.substr(2, 2);
@@ -96,7 +96,7 @@ std::string const Position::to_pgn() const
 std::string const Position::to_fen() const
 {
     std::string fen = "";
-    for (int y = 0; y < 8; y++) {
+    for (int y = 7; y >= 0; y--) {
         int empty = 0;
         for (int x = 0; x < 8; x++) {
             PieceInfo const &piece = board[y][x];
@@ -113,7 +113,7 @@ std::string const Position::to_fen() const
         }
         if (empty > 0)
             fen += std::to_string(empty);
-        if (y < 7)
+        if (y > 0)
             fen += "/";
     }
     fen += (turn == WHITE) ? " w " : " b ";

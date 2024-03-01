@@ -8,6 +8,12 @@ Game::Game(Player *white, Player *black)
     _history.emplace_back(_board.get_position());
 }
 
+Game::~Game()
+{
+    delete _white;
+    delete _black;
+}
+
 void Game::show() const
 {
     _board.print();
@@ -15,7 +21,7 @@ void Game::show() const
 
 void Game::wait(Player *player)
 {
-    ResponseStatus response = player->wait(_board.get_position());
+    ResponseStatus response = player->wait_move(_board.get_position());
     _status = apply(response);
 }
 
@@ -36,6 +42,11 @@ GameStatus Game::status() const
 
 GameStatus Game::move(Move move)
 {
+    Piece *piece = _board(move.from);
+    if ((piece == nullptr) || (piece->color != _board.turn())) {
+        std::cout << "No piece to move." << std::endl;
+        return ONGOING;
+    }
     if (!_board.is_legal(move)) {
         std::cout << "Illegal move." << std::endl;
         return ONGOING;
