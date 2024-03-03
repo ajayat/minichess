@@ -2,6 +2,9 @@
 
 #include "game.hpp"
 
+#define RESET "\e[0m"
+#define RED "\e[31m"
+
 Game::Game(Player *white, Player *black)
     : _white(white), _black(black), _status(ONGOING)
 {
@@ -44,11 +47,11 @@ GameStatus Game::move(Move move)
 {
     Piece *piece = _board(move.from);
     if ((piece == nullptr) || (piece->color != _board.turn())) {
-        std::cout << "No piece to move." << std::endl;
+        std::cout << RED << "No piece to move." << RESET << std::endl;
         return ONGOING;
     }
     if (!_board.is_legal(move)) {
-        std::cout << "Illegal move." << std::endl;
+        std::cout << RED << "Illegal move." << RESET << std::endl;
         return ONGOING;
     }
     Player *player = current();
@@ -57,6 +60,7 @@ GameStatus Game::move(Move move)
 
     _board.move(move);
     _history.emplace_back(_board.get_position());
+    _moves.emplace_back(move);
 
     Player *opponent = this->opponent(player);
     if (fifty_move_rule())
@@ -89,6 +93,7 @@ GameStatus Game::cancel()
 {
     if (_history.size() > 0) {
         _history.pop_back();
+        _moves.pop_back();
         _board.set_position(_history.back());
     }
     return ONGOING;

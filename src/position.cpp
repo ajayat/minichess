@@ -35,7 +35,7 @@ Move::Move(Square from, Square to, PieceType promotion)
 Move::Move(std::string const uci)
 {
     if (uci.size() != 4 && uci.size() != 5)
-        throw std::invalid_argument("UCI must be 4 or 5 characters long" + uci);
+        throw std::invalid_argument("UCI must be 4 or 5 characters long");
 
     from = uci.substr(0, 2);
     to = uci.substr(2, 2);

@@ -58,6 +58,14 @@ You can also run `make docs` to generate the documentation.
 
 After building the project, you can run the `./MiniChess` executable to start the program.
 
+### Options
+
+The program accepts the following options:
+
+| Option | Description |
+|:------ |:----------- |
+| `--engine` | Black are played by the Stockfish engine.|
+
 ### Tests
 
 To test the program, you can run the `test-level.sh` script in the `tests` directory. For example, to test the level 1, run the following command:

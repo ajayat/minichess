@@ -1,6 +1,6 @@
 #include "piece.hpp"
 
-Piece::Piece(PieceType type, std::string const name, Color color)
+Piece::Piece(PieceType const type, std::string const name, Color const color)
     : type(type), name(name), color(color)
 {}
 
@@ -8,32 +8,32 @@ Piece::Piece(Piece const &other)
     : type(other.type), name(other.name), color(other.color)
 {}
 
-void Piece::print() const
+std::string const Piece::render() const
 {
-    std::cout << name;
+    return name;
 }
 
-King::King(Color color)
+King::King(Color const color)
     : Piece(KING, (color == WHITE ? "\u2654" : "\u265a"), color)
 {}
 
-Queen::Queen(Color color)
+Queen::Queen(Color const color)
     : Piece(QUEEN, (color == WHITE ? "\u2655" : "\u265b"), color)
 {}
 
-Rook::Rook(Color color)
+Rook::Rook(Color const color)
     : Piece(ROOK, (color == WHITE ? "\u2656" : "\u265c"), color)
 {}
 
-Bishop::Bishop(Color color)
+Bishop::Bishop(Color const color)
     : Piece(BISHOP, (color == WHITE ? "\u2657" : "\u265d"), color)
 {}
 
-Knight::Knight(Color color)
+Knight::Knight(Color const color)
     : Piece(KNIGHT, (color == WHITE ? "\u2658" : "\u265e"), color)
 {}
 
-Pawn::Pawn(Color color)
+Pawn::Pawn(Color const color)
     : Piece(PAWN, (color == WHITE ? "\u2659" : "\u265f"), color)
 {}
 

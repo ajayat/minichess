@@ -5,6 +5,8 @@
 
 #include "position.hpp"
 
+enum PlayerType { HUMAN, ENGINE };
+
 enum Status { QUIT, CANCEL, DRAW, RESIGN, MOVE };
 
 struct ResponseStatus {
@@ -18,12 +20,15 @@ struct ResponseStatus {
 class Player
 {
   public:
-    Player(std::string const &name, Color color);
+    Player(std::string const &name, Color const color, PlayerType const type);
     virtual ~Player() = default;
 
     virtual ResponseStatus wait_move(Position const &position) = 0;
     std::string const &name() const;
     Color color() const;
+
+  public:
+    PlayerType const type;
 
   protected:
     std::string _name;
@@ -33,7 +38,7 @@ class Player
 class Engine : public Player
 {
   public:
-    Engine(std::string const name, Color color);
+    Engine(std::string const name, Color const color);
     ~Engine() override;
 
     ResponseStatus wait_move(Position const &position) override;

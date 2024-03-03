@@ -3,6 +3,11 @@
 
 #include "board.hpp"
 
+#define RESET "\e[0m"
+#define BLACKBG "\e[46m"
+#define WHITEBG "\e[107m"
+#define ITALIC "\e[3m"
+
 Board::Board() : _board{nullptr}
 {
     PieceType pieces[NCOL] = {
@@ -44,10 +49,8 @@ Board::~Board()
 
 void Board::print() const
 {
-    std::string space5 = std::string(5, '\u0020');
     std::cout << std::endl;
-    std::cout << "  +-----+-----+-----+-----+-----+-----+-----+-----+"
-              << std::endl;
+    std::cout << ITALIC << "   a  b  c  d  e  f  g  h  " << RESET << std::endl;
 
     int begin = NROW - 1, end = -1, step = -1;
     if (turn() == BLACK) {
@@ -56,22 +59,18 @@ void Board::print() const
         step = 1;
     }
     for (int i = begin; i != end; i += step) {
-        std::cout << i + 1 << " ";  // numérotation ligne dans affichage
+        std::cout << ITALIC << i + 1 << RESET " ";
         for (int j = 0; j < NROW; j++) {
-            std::cout << "|";
-            if (_board[i][j] != nullptr) {
-                std::cout << "\u0020\u0020";  // U+0020 est un espace utf-8
-                _board[i][j]->print();
-                std::cout << "\u0020\u0020";
-            }
+            std::cout << ((i + j) & 1 ? WHITEBG : BLACKBG);
+            if (_board[i][j] != nullptr)
+                std::cout << " " << _board[i][j]->render() << " ";
             else
-                std::cout << space5;
+                std::cout << "   ";
+            std::cout << RESET;
         }
-        std::cout << "|\n  +-----+-----+-----+-----+-----+-----+-----+-----+"
-                  << std::endl;
+        std::cout << std::endl;
     }
-    std::cout << "     a     b     c     d     e     f     g     h    "
-              << std::endl;
+    std::cout << std::endl;
 }
 
 Color Board::turn() const
@@ -177,7 +176,7 @@ bool Board::is_capture(Move const &move) const
     return _board[move.to.y][move.to.x] && is_pseudo_legal(move);
 }
 
-bool Board::is_attacked(Color color, Square const &square) const
+bool Board::is_attacked(Color const color, Square const &square) const
 {
     for (int y = 0; y < NROW; y++) {
         for (int x = 0; x < NCOL; x++) {
@@ -189,7 +188,7 @@ bool Board::is_attacked(Color color, Square const &square) const
     return false;
 }
 
-bool Board::is_checked(Color color) const
+bool Board::is_checked(Color const color) const
 {
     for (int y = 0; y < NROW; y++) {
         for (int x = 0; x < NCOL; x++) {
@@ -212,7 +211,7 @@ Position const Board::get_position() const
     return _position;
 }
 
-Piece *Board::create_piece(PieceType type, Color color)
+Piece *Board::create_piece(PieceType const type, Color const color)
 {
     switch (type) {
     case PAWN:

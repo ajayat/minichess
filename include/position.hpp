@@ -16,9 +16,7 @@ struct PieceInfo {
 /**
  * A square describe a location on the board
  */
-class Square
-{
-  public:
+struct Square {
     int x;  // file
     int y;  // rank
     std::string name;
@@ -49,14 +47,11 @@ struct Position {
 /**
  * Aggregates movement information
  */
-class Move
-{
-  public:
+struct Move {
     Square from;
     Square to;
     PieceType promotion = NIL;
 
-  public:
     Move(Square from, Square to, PieceType promotion = NIL);
     Move(std::string const uci);
     std::string const to_uci() const;

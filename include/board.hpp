@@ -23,14 +23,14 @@ class Board
     bool is_pseudo_legal(Move const &move) const;
     bool is_legal(Move const &move);
     bool is_capture(Move const &move) const;
-    bool is_checked(Color color) const;
+    bool is_checked(Color const color) const;
     bool is_promotion(Move const &move) const;
 
     Piece *operator()(Square const &square) const;
 
   private:
-    bool is_attacked(Color color, Square const &square) const;
-    Piece *create_piece(PieceType type, Color color);
+    bool is_attacked(Color const color, Square const &square) const;
+    Piece *create_piece(PieceType const type, Color const color);
     void _move(Square const &from, Square const &to);
 
   private:

@@ -7,10 +7,19 @@
 
 #include "player.hpp"
 
+#define RESET "\e[0m"
+#define BOLD_ITALIC "\e[3m\e[1m"
+#define RED "\e[31m"
+
+#define CHK(op)                                                                \
+    if ((op) == -1)                                                            \
+        std::perror(#op);
+
 enum Pipe { READ, WRITE };
 
-Player::Player(std::string const &name, Color color)
-    : _name(name), _color(color)
+Player::Player(std::string const &name, Color const color,
+               PlayerType const type)
+    : _name(name), _color(color), type(type)
 {}
 
 std::string const &Player::name() const
@@ -23,7 +32,9 @@ Color Player::color() const
     return _color;
 }
 
-Human::Human(std::string const name, Color color) : Player(name, color) {}
+Human::Human(std::string const name, Color const color)
+    : Player(name, color, HUMAN)
+{}
 
 bool Human::check(std::string &uci)
 {
@@ -38,7 +49,7 @@ bool Human::check(std::string &uci)
         return true;
     }
     catch (std::exception const &e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << RED << e.what() << RESET << std::endl;
         return false;
     }
 }
@@ -47,7 +58,7 @@ ResponseStatus Human::wait_move(Position const &position)
 {
     std::string uci;
     do {
-        std::cout << _name << ", enter your move: ";
+        std::cout << BOLD_ITALIC << _name << ", enter your move: " << RESET;
         std::cin >> uci;
         if (uci == "/quit")
             return ResponseStatus{QUIT};
@@ -77,10 +88,11 @@ PieceType Human::wait_promotion()
     }
 }
 
-Engine::Engine(std::string const name, Color color) : Player(name, color)
+Engine::Engine(std::string const name, Color const color)
+    : Player(name, color, ENGINE)
 {
-    pipe(_engine);
-    pipe(_cli);
+    CHK(pipe(_engine));
+    CHK(pipe(_cli));
 
     switch (_pid = fork()) {
     case -1:
@@ -101,9 +113,9 @@ Engine::Engine(std::string const name, Color color) : Player(name, color)
 
 Engine::~Engine()
 {
-    kill(_pid, SIGKILL);
-    close(_cli[READ]);
-    close(_engine[WRITE]);
+    CHK(close(_cli[READ]));
+    CHK(close(_engine[WRITE]));
+    CHK(kill(_pid, SIGKILL));
     waitpid(_pid, NULL, 0);
 }
 
@@ -111,10 +123,12 @@ static std::string readline(int fd)
 {
     char buf[1024];
     int i = 0;
-    while (read(fd, &buf[i], sizeof(char)) > 0) {
+    int n;
+    while ((n = read(fd, &buf[i], sizeof(char))) > 0) {
         if (buf[i++] == '\n')
             return std::string(buf);
     }
+    CHK(n);
     return std::string(buf);
 }
 
@@ -122,11 +136,11 @@ ResponseStatus Engine::wait_move(Position const &position)
 {
     // Send position
     std::string fen = position.to_fen();
-    write(_engine[WRITE], "position fen ", 13);
-    write(_engine[WRITE], fen.c_str(), fen.size());
-    write(_engine[WRITE], "\n", 1);
+    CHK(write(_engine[WRITE], "position fen ", 13));
+    CHK(write(_engine[WRITE], fen.c_str(), fen.size()));
+    CHK(write(_engine[WRITE], "\n", 1));
     // Send go command
-    write(_engine[WRITE], "go depth 10\n", 12);
+    CHK(write(_engine[WRITE], "go depth 10\n", 12));
 
     // Read bestmove
     std::string line;
