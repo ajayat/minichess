@@ -4,8 +4,9 @@
 #include "board.hpp"
 
 #define RESET "\e[0m"
-#define BLACKBG "\e[46m"
-#define WHITEBG "\e[107m"
+#define BOLD_BLACK "\e[1;30m"
+#define BLACKBG "\e[0;46m"
+#define WHITEBG "\e[0;107m"
 #define ITALIC "\e[3m"
 
 Board::Board() : _board{nullptr}
@@ -61,7 +62,7 @@ void Board::print() const
     for (int i = begin; i != end; i += step) {
         std::cout << ITALIC << i + 1 << RESET " ";
         for (int j = 0; j < NROW; j++) {
-            std::cout << ((i + j) & 1 ? WHITEBG : BLACKBG);
+            std::cout << ((i + j) & 1 ? WHITEBG : BLACKBG) << BOLD_BLACK;
             if (_board[i][j] != nullptr)
                 std::cout << " " << _board[i][j]->render() << " ";
             else
@@ -122,8 +123,12 @@ void Board::move(Move const &move)
         }
         castling[KINGSIDE] = castling[QUEENSIDE] = false;
     }
-    if (piece->type == ROOK)
-        castling[from.x == 7] = false;
+    if (piece->type == ROOK) {
+        if (from.x == 0)  // queenside rook
+            castling[QUEENSIDE] = false;
+        else if (from.x == 7)  // kingside rook
+            castling[KINGSIDE] = false;
+    }
 
     if (is_capture(move) || piece->type == PAWN)
         _position.fifty_move_rule = 0;

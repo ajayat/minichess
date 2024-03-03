@@ -1,0 +1,23 @@
+# On bouge la tour du coté du roi mais le grand roque reste possible
+e2e4 
+e7e5
+b1c3
+b8c6
+g1f3
+g8f6
+f1c4
+f8c5
+h1f1
+d7d6
+d2d3
+c8g4
+c1g5
+g4f3
+d1f3
+# Petit roque possible pour les noirs
+O-O
+# Grand roque encore possible pour les blancs
+O-O-O
+/quit
+
+,,wK,wR,,wR,,,wP,wP,wP,,,wP,wP,wP,,,wN,wP,,wQ,,,,,wB,,wP,,,,,,bB,,bP,,wB,,,,bN,bP,,bN,,,bP,bP,bP,,,bP,bP,bP,bR,,,bQ,,bR,bK,, ?-?

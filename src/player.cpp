@@ -58,7 +58,7 @@ ResponseStatus Human::wait_move(Position const &position)
 {
     std::string uci;
     do {
-        std::cout << BOLD_ITALIC << _name << ", enter your move: " << RESET;
+        std::cout << BOLD_ITALIC << _name << ", enter your move: " RESET;
         std::cin >> uci;
         if (uci == "/quit")
             return ResponseStatus{QUIT};

@@ -4,6 +4,7 @@
 
 #define RESET "\e[0m"
 #define RED "\e[31m"
+#define GREEN "\e[32m"
 
 Game::Game(Player *white, Player *black)
     : _white(white), _black(black), _status(ONGOING)
@@ -103,15 +104,22 @@ GameStatus Game::draw()
 {
     if (fifty_move_rule() || threefold_repetition())
         return ABORTED;
-    std::cout << opponent(current())->name() << ", accept draw ? (y/n): ";
+
+    Player *opponent = this->opponent(current());
+    if (opponent->type == ENGINE) {
+        std::cout << RED "Draw refused." RESET << std::endl;
+        return ONGOING;
+    }
+    std::cout << opponent->name() << ", accept draw ? (y/n): ";
 
     char answer;
     std::cin >> answer;
+    std::cin.ignore(256, '\n');
     if (answer == 'y') {
-        std::cout << "Draw accepted." << std::endl;
+        std::cout << GREEN "Draw accepted." RESET << std::endl;
         return ABORTED;
     }
-    std::cout << "Draw refused." << std::endl;
+    std::cout << RED "Draw refused." RESET << std::endl;
     return ONGOING;
 }
 

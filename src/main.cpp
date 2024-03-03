@@ -19,6 +19,6 @@ int main(int argc, char const *argv[])
     }
     game.show();
 
-    std::cout << std::endl << game.result() << std::endl;
+    std::cout << game.result() << std::endl;
     return 0;
 }
