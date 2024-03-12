@@ -1,8 +1,10 @@
 # MiniChess Project
 
+Authors: [Adrien Jayat](https://gitlab.unistra.fr/jayat)
+
 ## Get Started
 
-This project is two submodules:
+This project is using two submodules:
 
 - the [Doxygen Awesome](https://jothepro.github.io/doxygen-awesome-css/) theme for the [Doxygen](https://www.doxygen.nl/download.html) documentation generation tool.
 
@@ -52,6 +54,13 @@ cmake . -G "Unix Makefiles"
 
 Then, run `make` to build the project.
 
+To use the Stockfish engine, you need to build it with the following command:
+
+```bash
+cd Stockfish/src
+make -j profile-build
+```
+
 You can also run `make docs` to generate the documentation.
 
 Preview it with `firefox docs/html/index.html` for instance.
@@ -73,5 +82,5 @@ The program accepts the following options:
 To test the program, you can run the `test-level.sh` script in the `tests` directory. For example, to test the level 1, run the following command:
 
 ```bash
-cd tests && bash test-level.sh 1 ../echecs && cd .. 
+cd tests && bash test-level.sh 1 ../echecs
 ```

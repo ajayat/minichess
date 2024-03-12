@@ -2,13 +2,14 @@
 CMakeFiles/
 CMakeCache.txt
 *.cmake
+Makefile
 
 # Documentation files
 docs/*/
 
 # Executables
 *.exe
-MiniChess
+echecs
 
 # Logs
 **/*.log

@@ -101,7 +101,8 @@ Engine::Engine(std::string const name, Color const color)
         dup2(_engine[READ], STDIN_FILENO);
         dup2(_cli[WRITE], STDOUT_FILENO);
         execl("Stockfish/src/stockfish", "stockfish", NULL);
-        throw std::runtime_error("execl() failed");
+        throw std::runtime_error("execl() failed: "
+                                 "stockfish executable is probably missing.");
     default:
         close(_cli[WRITE]);
         close(_engine[READ]);
