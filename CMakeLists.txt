@@ -12,4 +12,4 @@ add_custom_target(docs
     COMMAND doxygen Doxyfile
 )
 
-add_executable(MiniChess ${SOURCES})
+add_executable(echecs ${SOURCES})

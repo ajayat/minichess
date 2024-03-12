@@ -54,9 +54,11 @@ Then, run `make` to build the project.
 
 You can also run `make docs` to generate the documentation.
 
+Preview it with `firefox docs/html/index.html` for instance.
+
 ## How to use
 
-After building the project, you can run the `./MiniChess` executable to start the program.
+After building the project, you can run the `./echecs` executable to start the program.
 
 ### Options
 
@@ -71,5 +73,5 @@ The program accepts the following options:
 To test the program, you can run the `test-level.sh` script in the `tests` directory. For example, to test the level 1, run the following command:
 
 ```bash
-cd tests && bash test-level.sh 1 ../MiniChess && cd .. 
+cd tests && bash test-level.sh 1 ../echecs && cd .. 
 ```

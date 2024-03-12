@@ -10,12 +10,12 @@
 #define RESET "\e[0m"
 #define BOLD_ITALIC "\e[3m\e[1m"
 #define RED "\e[31m"
+#define READ 0
+#define WRITE 1
 
 #define CHK(op)                                                                \
     if ((op) == -1)                                                            \
         std::perror(#op);
-
-enum Pipe { READ, WRITE };
 
 Player::Player(std::string const &name, Color const color,
                PlayerType const type)
