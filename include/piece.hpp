@@ -15,9 +15,9 @@
 class Piece
 {
   public:
-    Color const color;
     PieceType const type;
     std::string const name;
+    Color const color;
 
   public:
     Piece(PieceType const type, std::string const name, Color const color);

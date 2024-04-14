@@ -19,7 +19,7 @@
 
 Player::Player(std::string const &name, Color const color,
                PlayerType const type)
-    : _name(name), _color(color), type(type)
+    : type(type), _name(name), _color(color)
 {}
 
 std::string const &Player::name() const
@@ -54,20 +54,20 @@ bool Human::check(std::string &uci)
     }
 }
 
-ResponseStatus Human::wait_move(Position const &position)
+ResponseStatus Human::wait_move([[maybe_unused]] Position const &position)
 {
     std::string uci;
     do {
         std::cout << BOLD_ITALIC << _name << ", enter your move: " RESET;
         std::cin >> uci;
         if (uci == "/quit")
-            return ResponseStatus{QUIT};
+            return ResponseStatus{QUIT, ""};
         if (uci == "/cancel")
-            return ResponseStatus{CANCEL};
+            return ResponseStatus{CANCEL, ""};
         if (uci == "/draw")
-            return ResponseStatus{DRAW};
+            return ResponseStatus{DRAW, ""};
         if (uci == "/resign")
-            return ResponseStatus{RESIGN};
+            return ResponseStatus{RESIGN, ""};
     }
     while (!check(uci));
 
