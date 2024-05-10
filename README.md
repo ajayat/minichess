@@ -2,6 +2,10 @@
 
 Authors: [Adrien Jayat](https://gitlab.unistra.fr/jayat)
 
+A chess game in C++ with a colorful CLI.
+
+Implements all the rules defined by the Internal Chess Federation.
+
 ## Get Started
 
 This project is using two submodules:

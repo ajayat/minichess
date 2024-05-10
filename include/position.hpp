@@ -14,11 +14,11 @@ struct PieceInfo {
 };
 
 /**
- * A square describe a location on the board
+ * @brief A square describes a location on the board.
  */
 struct Square {
-    int x;  // file
-    int y;  // rank
+    int x; /* file */
+    int y; /* rank */
     std::string name;
 
     Square() noexcept;
@@ -29,23 +29,29 @@ struct Square {
 };
 
 /**
- * A position is a board state
+ * @brief A position is a board state (pieces, turn, castling rights, etc.).
  */
 struct Position {
     PieceInfo board[8][8];
     Square en_passant;
     Color turn;
-    bool castling[2][2];  // [color][side]
+    bool castling[2][2]; /* castling[COLOR][SIDE] */
     int fifty_move_rule;
     int fullmove_number;
 
     bool operator==(Position const &other) const;
+    /**
+     * @brief Describe a position from a string in FEN format.
+     */
     std::string const to_fen() const;
+    /**
+     * @brief Describe a position from a string in PGN format.
+     */
     std::string const to_pgn() const;
 };
 
 /**
- * Aggregates movement information
+ * @brief Aggregates movement information.
  */
 struct Move {
     Square from;
@@ -53,6 +59,11 @@ struct Move {
     PieceType promotion = NIL;
 
     Move(Square from, Square to, PieceType promotion = NIL);
+    /**
+     * @brief Describe a move from a string in UCI format.
+     * @param uci The move in UCI format (e.g. e2e4).
+     */
     Move(std::string const uci);
+
     std::string const to_uci() const;
 };
